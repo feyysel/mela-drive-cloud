@@ -1,0 +1,40 @@
+name: Go
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: apps/api/go.mod
+          cache-dependency-path: apps/api/go.sum
+
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13.1
+          working-directory: apps/api
+          install-only: true
+
+      - name: Lint
+        run: golangci-lint run ./...
+
+      - name: Build
+        run: go build ./...
