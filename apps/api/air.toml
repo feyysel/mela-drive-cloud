@@ -1,0 +1,18 @@
+root = "."
+
+[build]
+cmd = "go build -o tmp/api ./cmd/api"
+entrypoint = "tmp/api"
+include_ext = ["go"]
+exclude_dir = ["tmp", ".git"]
+delay = 3000
+env_files = [".env"]
+
+[misc]
+clean_on_exit = true
+
+[log]
+time = true
+
+[screen]
+keep_scroll = true
