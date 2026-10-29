@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "css.lint.unknownAtRules": "ignore",
+  "workbench.browser.openLocalhostLinks": false,
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "golang.go"
+  }
+}
