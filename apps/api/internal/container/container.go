@@ -7,14 +7,16 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/cache"
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/db"
+	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
 type Container struct {
-	Cfg   config.Config
-	Pool  *pgxpool.Pool
-	Redis *redis.Client
+	Cfg                 config.Config
+	Pool                *pgxpool.Pool
+	Redis               *redis.Client
+	RateLimitMiddleware *ratelimit.Middleware
 }
 
 func New(cfg config.Config) (*Container, error) {
@@ -43,9 +45,10 @@ func New(cfg config.Config) (*Container, error) {
 	ok = true
 
 	return &Container{
-		Cfg:   cfg,
-		Pool:  pool,
-		Redis: redisClient,
+		Cfg:                 cfg,
+		Pool:                pool,
+		Redis:               redisClient,
+		RateLimitMiddleware: ratelimit.NewMiddleware(redisClient),
 	}, nil
 }
 
