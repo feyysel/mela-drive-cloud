@@ -1,0 +1,12 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "eg": "e.g."
+  },
+  "errors": {
+    "unexpected": "An unexpected error occurred",
+    "offline": "Connection lost. Check your internet.",
+    "timeout": "The request timed out"
+  }
+}
