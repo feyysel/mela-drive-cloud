@@ -31,7 +31,7 @@ func (h *Handler) Get(ctx *gin.Context) {
 }
 
 func (h *Handler) UpdateName(ctx *gin.Context) {
-	userID, err := ginx.Param(ctx, "userId")
+	userID, err := ginx.UserID(ctx)
 	if err != nil {
 		res.Error(ctx, err)
 		return
@@ -53,7 +53,7 @@ func (h *Handler) UpdateName(ctx *gin.Context) {
 }
 
 func (h *Handler) UpdateEmail(ctx *gin.Context) {
-	userID, err := ginx.Param(ctx, "userId")
+	userID, err := ginx.UserID(ctx)
 	if err != nil {
 		res.Error(ctx, err)
 		return
@@ -75,7 +75,7 @@ func (h *Handler) UpdateEmail(ctx *gin.Context) {
 }
 
 func (h *Handler) Delete(ctx *gin.Context) {
-	userID, err := ginx.Param(ctx, "userId")
+	userID, err := ginx.UserID(ctx)
 	if err != nil {
 		res.Error(ctx, err)
 		return
