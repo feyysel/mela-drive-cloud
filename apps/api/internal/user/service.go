@@ -10,6 +10,7 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
 	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -31,8 +32,21 @@ func NewService(repo Repository, cache Cache, appCfg config.AppConfig) *Service 
 	}
 }
 
-func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, passwordHash string, role UserRole) (*User, error) {
-	user, err := NewUser(firstName, lastName, email, "", role)
+func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, password string, role UserRole) (*User, error) {
+	if err := requireValidPassword(password); err != nil {
+		return nil, err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return nil, errs.Wrap(errs.ErrInvalidInput, "Password is too long")
+		}
+
+		return nil, err
+	}
+
+	user, err := NewUser(firstName, lastName, email, string(hash), role)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +169,19 @@ func (s *Service) Delete(ctx context.Context, userID uuid.UUID) error {
 }
 
 func (s *Service) SeedOwner(ctx context.Context) error {
+	if err := requireValidPassword(s.appCfg.OwnerPassword); err != nil {
+		return err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(s.appCfg.OwnerPassword), bcrypt.DefaultCost)
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return errs.Wrap(errs.ErrInvalidInput, "Password is too long")
+		}
+
+		return err
+	}
+
 	count, err := s.repo.CountByRole(ctx, UserRoleOwner)
 	if err != nil {
 		return err
@@ -164,7 +191,7 @@ func (s *Service) SeedOwner(ctx context.Context) error {
 		return nil
 	}
 
-	user, err := NewUser("Owner", nil, s.appCfg.OwnerEmail, "", UserRoleOwner)
+	user, err := NewUser("Owner", nil, s.appCfg.OwnerEmail, string(hash), UserRoleOwner)
 	if err != nil {
 		return err
 	}

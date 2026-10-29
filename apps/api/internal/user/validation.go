@@ -5,6 +5,7 @@ import (
 
 	"github.com/feyysel/mela-drive-cloud/internal/emailx"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
+	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
 )
 
 func requireValidFirstName(firstName string) error {
@@ -44,6 +45,18 @@ func requireValidEmail(email string) error {
 
 	if err := emailx.Validate(email); err != nil {
 		return errs.Wrap(errs.ErrInvalidInput, "Invalid email")
+	}
+
+	return nil
+}
+
+func requireValidPassword(password string) error {
+	if stringsx.IsBlank(password) {
+		return errs.Wrap(errs.ErrInvalidInput, "Password is required")
+	}
+
+	if utf8.RuneCountInString(password) < 8 {
+		return errs.Wrap(errs.ErrInvalidInput, "Password must be at least 8 characters")
 	}
 
 	return nil
