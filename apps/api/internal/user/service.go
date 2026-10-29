@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/feyysel/mela-drive-cloud/internal/emailx"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
@@ -16,11 +17,12 @@ const (
 )
 
 type Service struct {
-	repo Repository
+	repo  Repository
+	cache Cache
 }
 
-func NewService(repo Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo Repository, cache Cache) *Service {
+	return &Service{repo: repo, cache: cache}
 }
 
 func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, passwordHash string, role UserRole) (*User, error) {
@@ -39,6 +41,28 @@ func (s *Service) Create(ctx context.Context, firstName string, lastName *string
 	}
 
 	return created, nil
+}
+
+func (s *Service) GetSnapshot(ctx context.Context, userID uuid.UUID) (*User, error) {
+	snapshot, err := s.cache.Get(ctx, userSnapshotKey(userID))
+	if err == nil {
+		return snapshot, nil
+	}
+
+	if !errors.Is(err, errs.ErrNotFound) {
+		slog.WarnContext(ctx, "failed to read user snapshot from cache", "user_id", userID, "err", err)
+	}
+
+	user, err := s.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.cache.Set(ctx, userSnapshotKey(userID), user, userSnapshotTTL); err != nil {
+		slog.WarnContext(ctx, "failed to cache user snapshot", "user_id", userID, "err", err)
+	}
+
+	return user, nil
 }
 
 func (s *Service) GetByID(ctx context.Context, userID uuid.UUID) (*User, error) {
