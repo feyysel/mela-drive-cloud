@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/emailx"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
 	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
@@ -17,12 +18,17 @@ const (
 )
 
 type Service struct {
-	repo  Repository
-	cache Cache
+	repo   Repository
+	cache  Cache
+	appCfg config.AppConfig
 }
 
-func NewService(repo Repository, cache Cache) *Service {
-	return &Service{repo: repo, cache: cache}
+func NewService(repo Repository, cache Cache, appCfg config.AppConfig) *Service {
+	return &Service{
+		repo:   repo,
+		cache:  cache,
+		appCfg: appCfg,
+	}
 }
 
 func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, passwordHash string, role UserRole) (*User, error) {
@@ -144,6 +150,35 @@ func (s *Service) Delete(ctx context.Context, userID uuid.UUID) error {
 
 		return err
 	}
+
+	return nil
+}
+
+func (s *Service) SeedOwner(ctx context.Context) error {
+	count, err := s.repo.CountByRole(ctx, UserRoleOwner)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	user, err := NewUser("Owner", nil, s.appCfg.OwnerEmail, "", UserRoleOwner)
+	if err != nil {
+		return err
+	}
+
+	owner, err := s.repo.Create(ctx, user)
+	if err != nil {
+		if errors.Is(err, errs.ErrConflict) {
+			return errs.Wrap(errs.ErrConflict, msgEmailInUse)
+		}
+
+		return err
+	}
+
+	slog.InfoContext(ctx, "owner seeded", "email", emailx.Mask(owner.Email))
 
 	return nil
 }

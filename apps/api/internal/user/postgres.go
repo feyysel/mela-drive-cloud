@@ -72,6 +72,17 @@ func (r *postgresRepository) GetByEmail(ctx context.Context, email string) (*Use
 	return user, nil
 }
 
+func (r *postgresRepository) CountByRole(ctx context.Context, role UserRole) (int, error) {
+	query := "SELECT COUNT(*) FROM users WHERE role = $1"
+
+	var count int
+	if err := r.pool.QueryRow(ctx, query, role).Scan(&count); err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (r *postgresRepository) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
 	query := fmt.Sprintf("UPDATE users SET first_name = $1, last_name = $2, updated_at = now() WHERE id = $3 RETURNING %s", columns)
 
