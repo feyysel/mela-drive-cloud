@@ -32,6 +32,13 @@ func Run() error {
 	}
 	defer c.Close()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := c.UserSvc.SeedOwner(ctx); err != nil {
+		return err
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()

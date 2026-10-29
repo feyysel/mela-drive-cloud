@@ -17,6 +17,7 @@ type AppConfig struct {
 	Port           string
 	Domain         string
 	OwnerEmail     string
+	OwnerPassword  string
 	AllowedOrigins []string
 }
 
@@ -58,6 +59,11 @@ func LoadApp() (AppConfig, error) {
 		return AppConfig{}, err
 	}
 
+	ownerPassword, err := get("APP_OWNER_PASSWORD")
+	if err != nil {
+		return AppConfig{}, err
+	}
+
 	originsRaw, err := get("APP_ALLOWED_ORIGINS")
 	if err != nil {
 		return AppConfig{}, err
@@ -88,6 +94,7 @@ func LoadApp() (AppConfig, error) {
 		Port:           port,
 		Domain:         domain,
 		OwnerEmail:     ownerEmail,
+		OwnerPassword:  ownerPassword,
 		AllowedOrigins: origins,
 	}, nil
 }
