@@ -1,7 +1,8 @@
 {
   "common": {
     "save": "አስቀምጥ",
-    "cancel": "ሰርዝ"
+    "cancel": "ሰርዝ",
+    "eg": "ለምሳሌ፦"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",
