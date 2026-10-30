@@ -117,6 +117,21 @@ func (r *postgresRepository) UpdateEmail(ctx context.Context, userID uuid.UUID, 
 	return updated, nil
 }
 
+func (r *postgresRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, passwordHash string) (*User, error) {
+	query := fmt.Sprintf("UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2 RETURNING %s", columns)
+
+	updated, err := scanUser(r.pool.QueryRow(ctx, query, passwordHash, userID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errs.ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return updated, nil
+}
+
 func (r *postgresRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 	query := "DELETE FROM users WHERE id = $1"
 

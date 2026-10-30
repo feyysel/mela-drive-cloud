@@ -4,13 +4,17 @@ import (
 	"context"
 	"time"
 
+	"github.com/feyysel/mela-drive-cloud/internal/auth"
 	"github.com/feyysel/mela-drive-cloud/internal/cache"
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/db"
+	"github.com/feyysel/mela-drive-cloud/internal/mail"
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
+	"github.com/feyysel/mela-drive-cloud/internal/session"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"github.com/resend/resend-go/v4"
 )
 
 type Container struct {
@@ -18,8 +22,10 @@ type Container struct {
 	Pool                *pgxpool.Pool
 	Redis               *redis.Client
 	RateLimitMiddleware *ratelimit.Middleware
+	AuthMiddleware      *auth.Middleware
 	UserSvc             *user.Service
 	UserHandler         *user.Handler
+	AuthHandler         *auth.Handler
 }
 
 func New(cfg config.Config) (*Container, error) {
@@ -45,7 +51,12 @@ func New(cfg config.Config) (*Container, error) {
 		}
 	}()
 
+	resendClient := resend.NewClient(cfg.Mail.APIKey)
+
 	userSvc := user.NewService(user.NewRepository(pool), user.NewCache(redisClient), cfg.App)
+	sessSvc := session.NewService(session.NewCache(redisClient), cfg.Session)
+	mailSvc := mail.NewService(resendClient)
+	authSvc := auth.NewService(auth.NewCache(redisClient), userSvc, sessSvc, mailSvc, cfg.App, cfg.Mail)
 
 	ok = true
 
@@ -54,8 +65,10 @@ func New(cfg config.Config) (*Container, error) {
 		Pool:                pool,
 		Redis:               redisClient,
 		RateLimitMiddleware: ratelimit.NewMiddleware(redisClient),
+		AuthMiddleware:      auth.NewMiddleware(sessSvc, userSvc, cfg.Session),
 		UserSvc:             userSvc,
 		UserHandler:         user.NewHandler(userSvc),
+		AuthHandler:         auth.NewHandler(authSvc, cfg.Session),
 	}, nil
 }
 

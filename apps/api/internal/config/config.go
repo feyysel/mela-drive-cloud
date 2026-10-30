@@ -8,6 +8,7 @@ type Config struct {
 	Redis   RedisConfig
 	Storage StorageConfig
 	Session SessionConfig
+	Mail    MailConfig
 }
 
 func Load() (Config, error) {
@@ -33,11 +34,17 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	mail, err := LoadMail()
+	if err != nil {
+		return Config{}, err
+	}
+
 	return Config{
 		App:     app,
 		DB:      db,
 		Redis:   redis,
 		Storage: storage,
 		Session: NewSessionConfig(app),
+		Mail:    mail,
 	}, nil
 }

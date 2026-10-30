@@ -156,6 +156,32 @@ func (s *Service) UpdateEmail(ctx context.Context, userID uuid.UUID, email strin
 	return updated, nil
 }
 
+func (s *Service) UpdatePassword(ctx context.Context, userID uuid.UUID, password string) (*User, error) {
+	if err := requireValidPassword(password); err != nil {
+		return nil, err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
+			return nil, errs.Wrap(errs.ErrInvalidInput, "Password is too long")
+		}
+
+		return nil, err
+	}
+
+	updated, err := s.repo.UpdatePassword(ctx, userID, string(hash))
+	if err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return nil, errs.Wrap(errs.ErrNotFound, msgUserNotFound)
+		}
+
+		return nil, err
+	}
+
+	return updated, nil
+}
+
 func (s *Service) Delete(ctx context.Context, userID uuid.UUID) error {
 	if err := s.repo.Delete(ctx, userID); err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
