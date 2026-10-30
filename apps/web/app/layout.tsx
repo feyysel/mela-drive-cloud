@@ -3,6 +3,7 @@ import { Geist_Mono, Inter, Noto_Sans_Ethiopic } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import { StoreProvider } from "@/store/provider"
 import { NextIntlClientProvider } from "next-intl"
 import { getLocale } from "next-intl/server"
 import { NuqsAdapter } from "nuqs/adapters/react"
@@ -41,9 +42,11 @@ export default async function RootLayout({
     >
       <body>
         <NextIntlClientProvider>
-          <NuqsAdapter>
-            <ThemeProvider>{children}</ThemeProvider>
-          </NuqsAdapter>
+          <ThemeProvider>
+            <StoreProvider>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </StoreProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
         <Toaster />
       </body>
