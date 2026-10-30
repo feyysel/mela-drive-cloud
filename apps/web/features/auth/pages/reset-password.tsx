@@ -15,12 +15,17 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Field, FieldGroup, FieldSet } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { Field, FieldError, FieldGroup, FieldSet } from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { parseErr } from "@/store/utils"
-import { AlertCircleIcon } from "lucide-react"
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useQueryState } from "nuqs"
 import { SubmitEvent, useEffect, useState } from "react"
@@ -35,6 +40,7 @@ export function ResetPassword() {
     useResetPasswordMutation()
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   const mismatch = confirmPassword.length > 0 && password !== confirmPassword
 
@@ -108,45 +114,58 @@ export function ResetPassword() {
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="New password"
-                    value={password}
-                    required
-                    disabled={isResetting}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <InputGroup>
+                    <InputGroupInput
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="New password"
+                      value={password}
+                      required
+                      disabled={isResetting}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        type="button"
+                        size="icon-xs"
+                        aria-label={
+                          showPassword ? "Hide passwords" : "Show passwords"
+                        }
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
                 </Field>
 
-                <Field>
-                  <Input
-                    id="confirm-password"
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    required
-                    disabled={isResetting}
-                    aria-invalid={mismatch}
-                    aria-describedby={
-                      mismatch ? "confirm-password-error" : undefined
-                    }
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
+                <Field data-invalid={mismatch}>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="confirm-password"
+                      name="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      required
+                      disabled={isResetting}
+                      aria-invalid={mismatch}
+                      aria-describedby={
+                        mismatch ? "confirm-password-error" : undefined
+                      }
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </InputGroup>
+                  {mismatch && (
+                    <FieldError id="confirm-password-error">
+                      Passwords do not match
+                    </FieldError>
+                  )}
                 </Field>
-
-                {mismatch && (
-                  <p
-                    id="confirm-password-error"
-                    className="text-sm text-destructive"
-                  >
-                    Passwords do not match
-                  </p>
-                )}
 
                 <Button
                   size="lg"
