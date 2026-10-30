@@ -12,6 +12,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lmittmann/tint v1.2.1
 	github.com/redis/go-redis/v9 v9.23.0
+	github.com/resend/resend-go/v4 v4.10.0
 	golang.org/x/crypto v0.56.0
 )
 
