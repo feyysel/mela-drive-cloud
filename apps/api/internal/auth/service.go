@@ -47,6 +47,10 @@ func (s *Service) Signup(ctx context.Context, firstName string, lastName *string
 }
 
 func (s *Service) Login(ctx context.Context, email, password, ip, userAgent string) (*session.Session, error) {
+	if err := requireValidEmail(email); err != nil {
+		return nil, err
+	}
+
 	u, err := s.userSvc.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
@@ -68,6 +72,10 @@ func (s *Service) Logout(ctx context.Context, userID, sessionID uuid.UUID) error
 }
 
 func (s *Service) ForgotPassword(ctx context.Context, email, origin string) error {
+	if err := requireValidEmail(email); err != nil {
+		return err
+	}
+
 	if err := requireValidOrigin(s.appCfg, origin); err != nil {
 		return err
 	}
