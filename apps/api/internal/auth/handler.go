@@ -112,3 +112,18 @@ func (h *Handler) ResetPassword(ctx *gin.Context) {
 
 	res.NoContent(ctx)
 }
+
+func (h *Handler) ValidateResetToken(ctx *gin.Context) {
+	var req ValidateResetTokenRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.ValidateResetToken(ctx, req.Token); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
+}

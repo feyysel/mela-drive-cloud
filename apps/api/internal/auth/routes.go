@@ -15,5 +15,6 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler, limit *ratelimit.
 	auth.POST("/login", sensitive, handler.Login)
 	auth.POST("/forgot-password", sensitive, handler.ForgotPassword)
 	auth.POST("/reset-password", sensitive, handler.ResetPassword)
+	auth.POST("/reset-password/validate", sensitive, handler.ValidateResetToken)
 	auth.POST("/logout", authMw.RequireAuth(), general, handler.Logout)
 }
