@@ -102,7 +102,7 @@ func (s *Service) ForgotPassword(ctx context.Context, email, origin string) erro
 		[]string{u.Email},
 		"reset-password-email-template",
 		map[string]any{
-			"FIRST_NAME": u.FirstName,
+			"NAME":       u.FirstName,
 			"RESET_LINK": origin + "/reset-password?token=" + token,
 		},
 	)
