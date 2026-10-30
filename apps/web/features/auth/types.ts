@@ -18,3 +18,7 @@ export type ResetPasswordRequest = {
   token: string
   password: string
 }
+
+export type ValidateResetTokenRequest = {
+  token: string
+}

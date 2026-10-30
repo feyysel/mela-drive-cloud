@@ -4,6 +4,7 @@ import type {
   LoginRequest,
   ResetPasswordRequest,
   SignupRequest,
+  ValidateResetTokenRequest,
 } from "./types"
 
 export const authApi = api.injectEndpoints({
@@ -44,6 +45,13 @@ export const authApi = api.injectEndpoints({
         body,
       }),
     }),
+    validateResetToken: build.mutation<void, ValidateResetTokenRequest>({
+      query: (body) => ({
+        url: "/auth/reset-password/validate",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
@@ -53,4 +61,5 @@ export const {
   useLogoutMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useValidateResetTokenMutation,
 } = authApi
