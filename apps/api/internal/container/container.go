@@ -8,6 +8,7 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/cache"
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/db"
+	"github.com/feyysel/mela-drive-cloud/internal/healthz"
 	"github.com/feyysel/mela-drive-cloud/internal/mail"
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
@@ -24,6 +25,7 @@ type Container struct {
 	RateLimitMiddleware *ratelimit.Middleware
 	AuthMiddleware      *auth.Middleware
 	UserSvc             *user.Service
+	HealthzHandler      *healthz.Handler
 	UserHandler         *user.Handler
 	AuthHandler         *auth.Handler
 }
@@ -53,6 +55,7 @@ func New(cfg config.Config) (*Container, error) {
 
 	resendClient := resend.NewClient(cfg.Mail.APIKey)
 
+	healthSvc := healthz.NewService(cfg.App)
 	userSvc := user.NewService(user.NewRepository(pool), user.NewCache(redisClient), cfg.App)
 	sessSvc := session.NewService(session.NewCache(redisClient), cfg.Session)
 	mailSvc := mail.NewService(resendClient)
@@ -67,6 +70,7 @@ func New(cfg config.Config) (*Container, error) {
 		RateLimitMiddleware: ratelimit.NewMiddleware(redisClient),
 		AuthMiddleware:      auth.NewMiddleware(sessSvc, userSvc, cfg.Session),
 		UserSvc:             userSvc,
+		HealthzHandler:      healthz.NewHandler(healthSvc),
 		UserHandler:         user.NewHandler(userSvc),
 		AuthHandler:         auth.NewHandler(authSvc, cfg.Session),
 	}, nil
