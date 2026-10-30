@@ -1,5 +1,5 @@
-import { config } from "@/lib/config";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { config } from "@/lib/config"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 export const api = createApi({
   reducerPath: "api",
@@ -9,7 +9,7 @@ export const api = createApi({
     credentials: "include",
   }),
 
-  tagTypes: [],
+  tagTypes: ["User"],
 
   endpoints: () => ({}),
-});
+})
