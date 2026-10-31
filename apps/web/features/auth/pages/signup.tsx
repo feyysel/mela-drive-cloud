@@ -44,16 +44,16 @@ export function Signup() {
   })
   const [showPassword, setShowPassword] = useState(false)
 
+  const canSubmit =
+    !!form.firstName &&
+    !!form.email &&
+    !!form.password &&
+    form.password.length >= 8
+
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (
-      !form.firstName ||
-      !form.email ||
-      !form.password ||
-      form.password.length < 8
-    )
-      return
+    if (!canSubmit) return
 
     try {
       await signup({
@@ -170,13 +170,7 @@ export function Signup() {
                 <Button
                   size="lg"
                   type="submit"
-                  disabled={
-                    isLoading ||
-                    !form.firstName ||
-                    !form.email ||
-                    !form.password ||
-                    form.password.length < 8
-                  }
+                  disabled={isLoading || !canSubmit}
                 >
                   {isLoading ? <Spinner /> : "Create account"}
                 </Button>
