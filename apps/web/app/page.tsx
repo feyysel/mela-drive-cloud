@@ -26,12 +26,6 @@ export default async function Page() {
           <li>{t("errors.offline")}</li>
           <li>{t("errors.timeout")}</li>
         </ul>
-
-        <Separator />
-
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
       </div>
     </div>
   )
