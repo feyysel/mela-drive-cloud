@@ -31,6 +31,15 @@ func (c *redisCache) Get(ctx context.Context, key string) (uuid.UUID, error) {
 	return uuid.Parse(value)
 }
 
+func (c *redisCache) Exists(ctx context.Context, key string) (bool, error) {
+	n, err := c.client.Exists(ctx, key).Result()
+	if err != nil {
+		return false, err
+	}
+
+	return n > 0, nil
+}
+
 func (c *redisCache) Set(ctx context.Context, key string, userID uuid.UUID, ttl time.Duration) error {
 	if userID == uuid.Nil {
 		return errs.ErrInvalidInput

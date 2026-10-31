@@ -131,3 +131,18 @@ func (s *Service) ResetPassword(ctx context.Context, token, password string) err
 
 	return s.sessionSvc.RevokeAll(ctx, userID)
 }
+
+func (s *Service) ValidateResetToken(ctx context.Context, token string) error {
+	sum := sha256.Sum256([]byte(token))
+
+	exists, err := s.cache.Exists(ctx, resetTokenKey(hex.EncodeToString(sum[:])))
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errs.Wrap(errs.ErrInvalidInput, "Invalid or expired reset token")
+	}
+
+	return nil
+}
