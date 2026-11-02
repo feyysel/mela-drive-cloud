@@ -25,17 +25,22 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { parseErr } from "@/store/utils"
+import { skipToken } from "@reduxjs/toolkit/query"
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useQueryState } from "nuqs"
-import { SubmitEvent, useEffect, useState } from "react"
-import { useResetPasswordMutation, useValidateResetTokenMutation } from "../api"
+import { type SubmitEvent, useState } from "react"
+import { useResetPasswordMutation, useValidateResetTokenQuery } from "../api"
 
 export function ResetPassword() {
+  const t = useTranslations("auth.resetPassword")
   const router = useRouter()
   const [token] = useQueryState("token")
-  const [validateToken, { isSuccess, isError }] =
-    useValidateResetTokenMutation()
+  const { isError, isLoading } = useValidateResetTokenQuery(
+    token ?? skipToken,
+    { refetchOnMountOrArgChange: true }
+  )
   const [resetPassword, { isLoading: isResetting, isSuccess: isResetSuccess }] =
     useResetPasswordMutation()
   const [password, setPassword] = useState("")
@@ -43,12 +48,6 @@ export function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false)
 
   const mismatch = confirmPassword.length > 0 && password !== confirmPassword
-
-  useEffect(() => {
-    if (!token) return
-
-    validateToken({ token })
-  }, [token, validateToken])
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -66,22 +65,7 @@ export function ResetPassword() {
     }
   }
 
-  if (!token || isError)
-    return (
-      <Empty className="h-dvh">
-        <EmptyHeader>
-          <EmptyMedia>
-            <AlertCircleIcon className="size-8 text-muted-foreground" />
-          </EmptyMedia>
-          <EmptyTitle>Invalid or expired link</EmptyTitle>
-          <EmptyDescription>
-            This password reset link is invalid or has expired.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    )
-
-  if (!isSuccess)
+  if (isLoading)
     return (
       <Empty className="h-dvh">
         <Spinner className="size-6" />
@@ -93,9 +77,22 @@ export function ResetPassword() {
       <Empty className="h-dvh">
         <EmptyHeader>
           <EmptyTitle className="shimmer text-muted-foreground shimmer-duration-1300 shimmer-spread-5">
-            Redirecting you to login
+            {t("redirecting")}
           </EmptyTitle>
-          <EmptyDescription>Please wait</EmptyDescription>
+          <EmptyDescription>{t("pleaseWait")}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
+
+  if (!token || isError)
+    return (
+      <Empty className="h-dvh">
+        <EmptyHeader>
+          <EmptyMedia>
+            <AlertCircleIcon className="size-8 text-muted-foreground" />
+          </EmptyMedia>
+          <EmptyTitle>{t("invalidTitle")}</EmptyTitle>
+          <EmptyDescription>{t("invalidDescription")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     )
@@ -104,10 +101,8 @@ export function ResetPassword() {
     <main className="flex h-dvh flex-col">
       <Card className="m-auto w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Set a new password</CardTitle>
-          <CardDescription>
-            Choose a new password for your account.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -120,7 +115,7 @@ export function ResetPassword() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="New password"
+                      placeholder={t("passwordPlaceholder")}
                       value={password}
                       required
                       disabled={isResetting}
@@ -131,7 +126,7 @@ export function ResetPassword() {
                         type="button"
                         size="icon-xs"
                         aria-label={
-                          showPassword ? "Hide passwords" : "Show passwords"
+                          showPassword ? "Hide password" : "Show password"
                         }
                         aria-pressed={showPassword}
                         onClick={() => setShowPassword(!showPassword)}
@@ -149,7 +144,7 @@ export function ResetPassword() {
                       name="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="Confirm new password"
+                      placeholder={t("confirmPasswordPlaceholder")}
                       value={confirmPassword}
                       required
                       disabled={isResetting}
@@ -162,7 +157,7 @@ export function ResetPassword() {
                   </InputGroup>
                   {mismatch && (
                     <FieldError id="confirm-password-error">
-                      Passwords do not match
+                      {t("passwordMismatch")}
                     </FieldError>
                   )}
                 </Field>
@@ -174,7 +169,7 @@ export function ResetPassword() {
                     isResetting || mismatch || !password || !confirmPassword
                   }
                 >
-                  {isResetting ? <Spinner /> : "Reset password"}
+                  {isResetting ? <Spinner /> : t("submit")}
                 </Button>
               </FieldGroup>
             </FieldSet>
