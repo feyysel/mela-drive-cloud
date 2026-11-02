@@ -22,5 +22,5 @@ type ResetPasswordRequest struct {
 }
 
 type ValidateResetTokenRequest struct {
-	Token string `form:"token" binding:"required"`
+	Token string `json:"token" binding:"required"`
 }

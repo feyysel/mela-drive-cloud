@@ -26,15 +26,13 @@ import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { parseErr } from "@/store/utils"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { type SubmitEvent, useState } from "react"
+import { SubmitEvent, useState } from "react"
 import { useLoginMutation } from "../api"
 import type { LoginRequest } from "../types"
 
 export function Login() {
-  const t = useTranslations("auth.login")
   const router = useRouter()
   const [login, { isLoading }] = useLoginMutation()
   const [form, setForm] = useState<LoginRequest>({
@@ -62,22 +60,22 @@ export function Login() {
     <main className="flex min-h-dvh flex-col px-4 py-10">
       <Card className="m-auto w-full max-w-md">
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardTitle>Welcome back</CardTitle>
+          <CardDescription>Log in to your Mela Drive account.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     inputMode="email"
                     autoComplete="email"
-                    placeholder={t("emailPlaceholder")}
+                    placeholder="e.g. you@example.com"
                     value={form.email}
                     required
                     disabled={isLoading}
@@ -90,14 +88,14 @@ export function Login() {
 
                 <Field>
                   <div className="flex items-center justify-between">
-                    <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
                     <Button
                       nativeButton={false}
                       variant="link"
                       render={<Link href="/forgot-password" />}
                       className="text-muted-foreground"
                     >
-                      {t("forgotPassword")}
+                      Forgot password?
                     </Button>
                   </div>
                   <InputGroup>
@@ -106,7 +104,7 @@ export function Login() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
-                      placeholder={t("passwordPlaceholder")}
+                      placeholder="Enter your password"
                       value={form.password}
                       required
                       disabled={isLoading}
@@ -119,7 +117,7 @@ export function Login() {
                         type="button"
                         size="icon-xs"
                         aria-label={
-                          showPassword ? t("hidePassword") : t("showPassword")
+                          showPassword ? "Hide password" : "Show password"
                         }
                         aria-pressed={showPassword}
                         onClick={() => setShowPassword(!showPassword)}
@@ -135,11 +133,12 @@ export function Login() {
                   type="submit"
                   disabled={isLoading || !canSubmit}
                 >
-                  {isLoading ? <Spinner /> : t("submit")}
+                  {isLoading ? <Spinner /> : "Log in"}
                 </Button>
 
                 <FieldDescription className="text-center">
-                  {t("noAccount")} <Link href="/signup">{t("signup")}</Link>
+                  Don&apos;t have an account?{" "}
+                  <Link href="/signup">Sign up</Link>
                 </FieldDescription>
               </FieldGroup>
             </FieldSet>

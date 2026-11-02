@@ -21,13 +21,10 @@ import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { parseErr } from "@/store/utils"
 import { MailOpenIcon } from "lucide-react"
-import { useTranslations } from "next-intl"
-import { type SubmitEvent, useState } from "react"
+import { SubmitEvent, useState } from "react"
 import { useForgotPasswordMutation } from "../api"
 
 export function ForgotPassword() {
-  const t = useTranslations("auth.forgotPassword")
-  const auth = useTranslations("auth.login")
   const [forgotPassword, { isLoading, isSuccess }] = useForgotPasswordMutation()
   const [email, setEmail] = useState("")
 
@@ -50,8 +47,10 @@ export function ForgotPassword() {
           <EmptyMedia>
             <MailOpenIcon className="size-8 text-muted-foreground" />
           </EmptyMedia>
-          <EmptyTitle>{t("successTitle")}</EmptyTitle>
-          <EmptyDescription>{t("successDescription")}</EmptyDescription>
+          <EmptyTitle>Check your email</EmptyTitle>
+          <EmptyDescription>
+            We&apos;ve sent a password reset email to your inbox.
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     )
@@ -60,22 +59,24 @@ export function ForgotPassword() {
     <main className="flex min-h-dvh flex-col px-4 py-10">
       <Card className="m-auto w-full max-w-md">
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardTitle>Forgot your password?</CardTitle>
+          <CardDescription>
+            Enter your email to reset your password.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="email">{auth("email")}</FieldLabel>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     inputMode="email"
                     autoComplete="email"
-                    placeholder={auth("emailPlaceholder")}
+                    placeholder="e.g. you@example.com"
                     value={email}
                     required
                     disabled={isLoading}
@@ -85,7 +86,7 @@ export function ForgotPassword() {
                 </Field>
 
                 <Button size="lg" type="submit" disabled={isLoading || !email}>
-                  {isLoading ? <Spinner /> : t("submit")}
+                  {isLoading ? <Spinner /> : "Send reset email"}
                 </Button>
               </FieldGroup>
             </FieldSet>

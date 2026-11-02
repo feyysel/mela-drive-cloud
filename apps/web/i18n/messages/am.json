@@ -1,9 +1,4 @@
 {
-  "site": {
-    "name": "Mela Drive",
-    "tagline": "ፋይሎችዎ። በደህንነት የተደራጁ።",
-    "description": "Mela Drive ፋይሎችን በደህንነት ለማከማቸት፣ ለማደራጀት፣ ቅድመ እይታ ለማየት እና ለማጋራት የሚያስችል የፋይል አስተዳደር መድረክ ነው።"
-  },
   "common": {
     "save": "አስቀምጥ",
     "cancel": "ሰርዝ",
@@ -13,54 +8,5 @@
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",
     "offline": "ግንኙነት ተቋርጧል። በይነመረብዎን ያረጋግጡ።",
     "timeout": "ጥያቄው ጊዜው አልፎበታል"
-  },
-  "auth": {
-    "login": {
-      "title": "እንኳን በደህና ተመለሱ",
-      "description": "ወደ Mela Drive መለያዎ ይግቡ።",
-      "email": "ኢሜይል",
-      "password": "የይለፍ ቃል",
-      "emailPlaceholder": "ለምሳሌ፦ you@example.com",
-      "passwordPlaceholder": "የይለፍ ቃልዎን ያስገቡ",
-      "forgotPassword": "የይለፍ ቃልዎን ረሱ?",
-      "submit": "ግባ",
-      "noAccount": "መለያ የለዎትም?",
-      "signup": "ይመዝገቡ",
-      "showPassword": "የይለፍ ቃል አሳይ",
-      "hidePassword": "የይለፍ ቃል ደብቅ"
-    },
-    "forgotPassword": {
-      "title": "የይለፍ ቃልዎን ረሱ?",
-      "description": "የይለፍ ቃልዎን ለመቀየር ኢሜይልዎን ያስገቡ።",
-      "submit": "የመቀየሪያ ኢሜይል ላክ",
-      "successTitle": "ኢሜይልዎን ይመልከቱ",
-      "successDescription": "የይለፍ ቃል መቀየሪያ ኢሜይል ወደ ገቢ መልዕክቶችዎ ልከናል።"
-    },
-    "resetPassword": {
-      "title": "አዲስ የይለፍ ቃል ያዘጋጁ",
-      "description": "ለመለያዎ አዲስ የይለፍ ቃል ይምረጡ።",
-      "passwordPlaceholder": "አዲስ የይለፍ ቃል",
-      "confirmPasswordPlaceholder": "አዲሱን የይለፍ ቃል ያረጋግጡ",
-      "passwordMismatch": "የይለፍ ቃሎቹ አይዛመዱም",
-      "submit": "የይለፍ ቃል ቀይር",
-      "invalidTitle": "ልክ ያልሆነ ወይም ጊዜው ያለፈበት ሊንክ",
-      "invalidDescription": "ይህ የይለፍ ቃል መቀየሪያ ሊንክ ልክ አይደለም ወይም ጊዜው አልፎበታል።",
-      "redirecting": "ወደ መግቢያ ገጹ በመመለስ ላይ",
-      "pleaseWait": "እባክዎ ይጠብቁ"
-    },
-    "signup": {
-      "title": "መለያዎን ይፍጠሩ",
-      "description": "ፋይሎችዎን በMela Drive ያከማቹ፣ ያደራጁ እና ያጋሩ።",
-      "firstName": "የመጀመሪያ ስም",
-      "lastName": "የአባት ስም",
-      "optional": "አማራጭ",
-      "firstNamePlaceholder": "ለምሳሌ፦ አበበ",
-      "lastNamePlaceholder": "ለምሳሌ፦ ከበደ",
-      "passwordPlaceholder": "የይለፍ ቃል ይፍጠሩ",
-      "passwordHint": "ቢያንስ 8 ቁምፊዎች።",
-      "submit": "መለያ ፍጠር",
-      "alreadyHaveAccount": "አስቀድመው መለያ አለዎት?",
-      "login": "ግባ"
-    }
   }
 }

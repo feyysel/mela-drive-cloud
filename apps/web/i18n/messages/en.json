@@ -1,9 +1,4 @@
 {
-  "site": {
-    "name": "Mela Drive",
-    "tagline": "Your files. Securely organized.",
-    "description": "Mela Drive is a file management platform for securely storing, organizing, previewing, and sharing files."
-  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -13,54 +8,5 @@
     "unexpected": "An unexpected error occurred",
     "offline": "Connection lost. Check your internet.",
     "timeout": "The request timed out"
-  },
-  "auth": {
-    "login": {
-      "title": "Welcome back",
-      "description": "Log in to your Mela Drive account.",
-      "email": "Email",
-      "password": "Password",
-      "emailPlaceholder": "e.g. you@example.com",
-      "passwordPlaceholder": "Enter your password",
-      "forgotPassword": "Forgot password?",
-      "submit": "Log in",
-      "noAccount": "Don't have an account?",
-      "signup": "Sign up",
-      "showPassword": "Show password",
-      "hidePassword": "Hide password"
-    },
-    "forgotPassword": {
-      "title": "Forgot your password?",
-      "description": "Enter your email to reset your password.",
-      "submit": "Send reset email",
-      "successTitle": "Check your email",
-      "successDescription": "We've sent a password reset email to your inbox."
-    },
-    "resetPassword": {
-      "title": "Set a new password",
-      "description": "Choose a new password for your account.",
-      "passwordPlaceholder": "New password",
-      "confirmPasswordPlaceholder": "Confirm new password",
-      "passwordMismatch": "Passwords do not match",
-      "submit": "Reset password",
-      "invalidTitle": "Invalid or expired link",
-      "invalidDescription": "This password reset link is invalid or has expired.",
-      "redirecting": "Redirecting you to login",
-      "pleaseWait": "Please wait"
-    },
-    "signup": {
-      "title": "Create your account",
-      "description": "Store, organize, and share your files with Mela Drive.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "optional": "Optional",
-      "firstNamePlaceholder": "e.g. Abebe",
-      "lastNamePlaceholder": "e.g. Kebede",
-      "passwordPlaceholder": "Create a password",
-      "passwordHint": "At least 8 characters.",
-      "submit": "Create account",
-      "alreadyHaveAccount": "Already have an account?",
-      "login": "Log in"
-    }
   }
 }
