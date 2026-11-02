@@ -27,13 +27,16 @@ import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { parseErr } from "@/store/utils"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { SubmitEvent, useState } from "react"
+import { type SubmitEvent, useState } from "react"
 import { useSignupMutation } from "../api"
 import type { SignupRequest } from "../types"
 
 export function Signup() {
+  const t = useTranslations("auth.signup")
+  const auth = useTranslations("auth.login")
   const router = useRouter()
   const [signup, { isLoading }] = useSignupMutation()
   const [form, setForm] = useState<SignupRequest>({
@@ -70,10 +73,8 @@ export function Signup() {
     <main className="flex min-h-dvh flex-col px-4 py-10">
       <Card className="m-auto w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>
-            Store, organize, and share your files with Mela Drive.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -81,12 +82,14 @@ export function Signup() {
               <FieldGroup>
                 <Field orientation="horizontal">
                   <Field>
-                    <FieldLabel htmlFor="firstName">First name</FieldLabel>
+                    <FieldLabel htmlFor="firstName">
+                      {t("firstName")}
+                    </FieldLabel>
                     <Input
                       id="firstName"
                       name="firstName"
                       autoComplete="given-name"
-                      placeholder="e.g. Abebe"
+                      placeholder={t("firstNamePlaceholder")}
                       value={form.firstName}
                       required
                       disabled={isLoading}
@@ -99,14 +102,14 @@ export function Signup() {
 
                   <Field>
                     <FieldLabel htmlFor="lastName">
-                      Last name
-                      <Badge variant="outline">optional</Badge>
+                      {t("lastName")}
+                      <Badge variant="outline">{t("optional")}</Badge>
                     </FieldLabel>
                     <Input
                       id="lastName"
                       name="lastName"
                       autoComplete="family-name"
-                      placeholder="e.g. Kebede"
+                      placeholder={t("lastNamePlaceholder")}
                       value={form.lastName ?? ""}
                       disabled={isLoading}
                       onChange={(e) =>
@@ -117,14 +120,14 @@ export function Signup() {
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <FieldLabel htmlFor="email">{auth("email")}</FieldLabel>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     inputMode="email"
                     autoComplete="email"
-                    placeholder="e.g. you@example.com"
+                    placeholder={auth("emailPlaceholder")}
                     value={form.email}
                     required
                     disabled={isLoading}
@@ -135,14 +138,14 @@ export function Signup() {
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">{auth("password")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="Create a password"
+                      placeholder={t("passwordPlaceholder")}
                       value={form.password}
                       required
                       disabled={isLoading}
@@ -155,7 +158,9 @@ export function Signup() {
                         type="button"
                         size="icon-xs"
                         aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                          showPassword
+                            ? auth("hidePassword")
+                            : auth("showPassword")
                         }
                         aria-pressed={showPassword}
                         onClick={() => setShowPassword(!showPassword)}
@@ -164,7 +169,7 @@ export function Signup() {
                       </InputGroupButton>
                     </InputGroupAddon>
                   </InputGroup>
-                  <FieldDescription>At least 8 characters.</FieldDescription>
+                  <FieldDescription>{t("passwordHint")}</FieldDescription>
                 </Field>
 
                 <Button
@@ -172,11 +177,12 @@ export function Signup() {
                   type="submit"
                   disabled={isLoading || !canSubmit}
                 >
-                  {isLoading ? <Spinner /> : "Create account"}
+                  {isLoading ? <Spinner /> : t("submit")}
                 </Button>
 
                 <FieldDescription className="text-center">
-                  Already have an account? <Link href="/login">Log in</Link>
+                  {t("alreadyHaveAccount")}{" "}
+                  <Link href="/login">{t("login")}</Link>
                 </FieldDescription>
               </FieldGroup>
             </FieldSet>

@@ -115,7 +115,7 @@ func (h *Handler) ResetPassword(ctx *gin.Context) {
 
 func (h *Handler) ValidateResetToken(ctx *gin.Context) {
 	var req ValidateResetTokenRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		res.Error(ctx, err)
 		return
 	}
@@ -125,5 +125,6 @@ func (h *Handler) ValidateResetToken(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Header("Cache-Control", "no-store")
 	res.NoContent(ctx)
 }
