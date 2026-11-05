@@ -8,6 +8,7 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/cache"
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/db"
+	"github.com/feyysel/mela-drive-cloud/internal/folder"
 	"github.com/feyysel/mela-drive-cloud/internal/healthz"
 	"github.com/feyysel/mela-drive-cloud/internal/mail"
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
@@ -27,6 +28,7 @@ type Container struct {
 	UserSvc             *user.Service
 	HealthzHandler      *healthz.Handler
 	UserHandler         *user.Handler
+	FolderHandler       *folder.Handler
 	AuthHandler         *auth.Handler
 }
 
@@ -60,6 +62,7 @@ func New(cfg config.Config) (*Container, error) {
 	sessSvc := session.NewService(session.NewCache(redisClient), cfg.Session)
 	mailSvc := mail.NewService(resendClient)
 	authSvc := auth.NewService(auth.NewCache(redisClient), userSvc, sessSvc, mailSvc, cfg.App, cfg.Mail)
+	folderSvc := folder.NewService(folder.NewRepository(pool))
 
 	ok = true
 
@@ -72,6 +75,7 @@ func New(cfg config.Config) (*Container, error) {
 		UserSvc:             userSvc,
 		HealthzHandler:      healthz.NewHandler(healthSvc),
 		UserHandler:         user.NewHandler(userSvc),
+		FolderHandler:       folder.NewHandler(folderSvc),
 		AuthHandler:         auth.NewHandler(authSvc, cfg.Session),
 	}, nil
 }
