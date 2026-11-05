@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/feyysel/mela-drive-cloud/internal/auth"
 	"github.com/feyysel/mela-drive-cloud/internal/container"
+	"github.com/feyysel/mela-drive-cloud/internal/folder"
 	"github.com/feyysel/mela-drive-cloud/internal/healthz"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/gin-gonic/gin"
@@ -20,4 +21,6 @@ func registerRoutes(router *gin.Engine, c *container.Container) {
 	users := protected.Group("/users")
 
 	user.RegisterRoutes(users, c.UserHandler, c.RateLimitMiddleware)
+
+	folder.RegisterRoutes(protected, c.FolderHandler, c.RateLimitMiddleware)
 }
