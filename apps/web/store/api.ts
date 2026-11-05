@@ -9,7 +9,7 @@ export const api = createApi({
     credentials: "include",
   }),
 
-  tagTypes: ["User"],
+  tagTypes: ["User", "Folder"],
 
   endpoints: () => ({}),
 })
