@@ -2,31 +2,27 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 
 	"github.com/feyysel/mela-drive-cloud/internal/config"
-	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func Connect(ctx context.Context, cfg config.DBConfig) (*pgxpool.Pool, error) {
-	poolCfg, err := pgxpool.ParseConfig(cfg.URL)
+func Connect(ctx context.Context, cfg config.DBConfig) (*sql.DB, error) {
+	pool, err := sql.Open("mysql", cfg.URL)
 	if err != nil {
-		return nil, fmt.Errorf("parse database url: %w", err)
+		return nil, fmt.Errorf("open database: %w", err)
 	}
 
-	pool, err := pgxpool.NewWithConfig(ctx, poolCfg)
-	if err != nil {
-		return nil, fmt.Errorf("create pool: %w", err)
-	}
-
-	if err := pool.Ping(ctx); err != nil {
+	if err := pool.PingContext(ctx); err != nil {
 		pool.Close()
 
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 
-	slog.InfoContext(ctx, "db connected", "host", poolCfg.ConnConfig.Host, "name", poolCfg.ConnConfig.Database)
+	slog.InfoContext(ctx, "db connected")
 
 	return pool, nil
 }
