@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/feyysel/mela-drive-cloud/internal/auth"
@@ -14,14 +15,13 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/resend/resend-go/v4"
 )
 
 type Container struct {
 	Cfg                 config.Config
-	Pool                *pgxpool.Pool
+	Pool                *sql.DB
 	Redis               *redis.Client
 	RateLimitMiddleware *ratelimit.Middleware
 	AuthMiddleware      *auth.Middleware
