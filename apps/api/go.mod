@@ -3,6 +3,7 @@ module github.com/feyysel/mela-drive-cloud
 go 1.27.2
 
 require (
+	github.com/VividCortex/mysqlerr v1.0.0
 	github.com/gin-contrib/cors v1.7.9
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-redis/redis_rate/v10 v10.0.1

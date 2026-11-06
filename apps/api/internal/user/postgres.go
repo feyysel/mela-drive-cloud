@@ -2,52 +2,51 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
+	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
 	columns = "id, first_name, last_name, email, password_hash, role, created_at, updated_at"
 
-	constraintEmail = "users_email_key"
+	keyEmail = "users.email"
 )
 
-type postgresRepository struct {
-	pool *pgxpool.Pool
+type mysqlRepository struct {
+	db *sql.DB
 }
 
-func NewRepository(pool *pgxpool.Pool) Repository {
-	return &postgresRepository{pool: pool}
+func NewRepository(db *sql.DB) Repository {
+	return &mysqlRepository{db: db}
 }
 
-func (r *postgresRepository) Create(ctx context.Context, user *User) (*User, error) {
-	query := fmt.Sprintf("INSERT INTO users (id, first_name, last_name, email, password_hash, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING %s", columns)
+func (r *mysqlRepository) Create(ctx context.Context, user *User) (*User, error) {
+	query := "INSERT INTO users (id, first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)"
 
-	created, err := scanUser(r.pool.QueryRow(ctx, query, user.ID, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Role))
-	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation && pgErr.ConstraintName == constraintEmail {
+	if _, err := r.db.ExecContext(ctx, query, user.ID, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Role); err != nil {
+		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(mysqlErr.Message, keyEmail) {
 			return nil, errs.ErrConflict
 		}
 
 		return nil, err
 	}
 
-	return created, nil
+	return r.GetByID(ctx, user.ID)
 }
 
-func (r *postgresRepository) GetByID(ctx context.Context, userID uuid.UUID) (*User, error) {
-	query := fmt.Sprintf("SELECT %s FROM users WHERE id = $1", columns)
+func (r *mysqlRepository) GetByID(ctx context.Context, userID uuid.UUID) (*User, error) {
+	query := fmt.Sprintf("SELECT %s FROM users WHERE id = ?", columns)
 
-	user, err := scanUser(r.pool.QueryRow(ctx, query, userID))
+	user, err := scanUser(r.db.QueryRowContext(ctx, query, userID))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errs.ErrNotFound
 		}
 
@@ -57,12 +56,12 @@ func (r *postgresRepository) GetByID(ctx context.Context, userID uuid.UUID) (*Us
 	return user, nil
 }
 
-func (r *postgresRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
-	query := fmt.Sprintf("SELECT %s FROM users WHERE email = $1", columns)
+func (r *mysqlRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := fmt.Sprintf("SELECT %s FROM users WHERE email = ?", columns)
 
-	user, err := scanUser(r.pool.QueryRow(ctx, query, email))
+	user, err := scanUser(r.db.QueryRowContext(ctx, query, email))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errs.ErrNotFound
 		}
 
@@ -72,82 +71,72 @@ func (r *postgresRepository) GetByEmail(ctx context.Context, email string) (*Use
 	return user, nil
 }
 
-func (r *postgresRepository) CountByRole(ctx context.Context, role UserRole) (int, error) {
-	query := "SELECT COUNT(*) FROM users WHERE role = $1"
+func (r *mysqlRepository) CountByRole(ctx context.Context, role UserRole) (int, error) {
+	query := "SELECT COUNT(*) FROM users WHERE role = ?"
 
 	var count int
-	if err := r.pool.QueryRow(ctx, query, role).Scan(&count); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, role).Scan(&count); err != nil {
 		return 0, err
 	}
 
 	return count, nil
 }
 
-func (r *postgresRepository) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
-	query := fmt.Sprintf("UPDATE users SET first_name = $1, last_name = $2, updated_at = now() WHERE id = $3 RETURNING %s", columns)
+func (r *mysqlRepository) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
+	query := "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?"
 
-	updated, err := scanUser(r.pool.QueryRow(ctx, query, firstName, lastName, userID))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.ErrNotFound
-		}
-
+	if _, err := r.db.ExecContext(ctx, query, firstName, lastName, userID); err != nil {
 		return nil, err
 	}
 
-	return updated, nil
+	return r.GetByID(ctx, userID)
 }
 
-func (r *postgresRepository) UpdateEmail(ctx context.Context, userID uuid.UUID, email string) (*User, error) {
-	query := fmt.Sprintf("UPDATE users SET email = $1, updated_at = now() WHERE id = $2 RETURNING %s", columns)
+func (r *mysqlRepository) UpdateEmail(ctx context.Context, userID uuid.UUID, email string) (*User, error) {
+	query := "UPDATE users SET email = ? WHERE id = ?"
 
-	updated, err := scanUser(r.pool.QueryRow(ctx, query, email, userID))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.ErrNotFound
-		}
-
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation && pgErr.ConstraintName == constraintEmail {
+	if _, err := r.db.ExecContext(ctx, query, email, userID); err != nil {
+		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(mysqlErr.Message, keyEmail) {
 			return nil, errs.ErrConflict
 		}
 
 		return nil, err
 	}
 
-	return updated, nil
+	return r.GetByID(ctx, userID)
 }
 
-func (r *postgresRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, passwordHash string) (*User, error) {
-	query := fmt.Sprintf("UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2 RETURNING %s", columns)
+func (r *mysqlRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, passwordHash string) (*User, error) {
+	query := "UPDATE users SET password_hash = ? WHERE id = ?"
 
-	updated, err := scanUser(r.pool.QueryRow(ctx, query, passwordHash, userID))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.ErrNotFound
-		}
-
+	if _, err := r.db.ExecContext(ctx, query, passwordHash, userID); err != nil {
 		return nil, err
 	}
 
-	return updated, nil
+	return r.GetByID(ctx, userID)
 }
 
-func (r *postgresRepository) Delete(ctx context.Context, userID uuid.UUID) error {
-	query := "DELETE FROM users WHERE id = $1"
+func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
+	query := "DELETE FROM users WHERE id = ?"
 
-	tag, err := r.pool.Exec(ctx, query, userID)
+	result, err := r.db.ExecContext(ctx, query, userID)
 	if err != nil {
 		return err
 	}
 
-	if tag.RowsAffected() == 0 {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
 		return errs.ErrNotFound
 	}
 
 	return nil
 }
 
-func scanUser(row pgx.Row) (*User, error) {
+func scanUser(row *sql.Row) (*User, error) {
 	var user User
 
 	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {

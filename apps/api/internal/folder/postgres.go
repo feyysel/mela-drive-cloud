@@ -2,48 +2,50 @@ package folder
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
+	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const columns = "id, owner_id, parent_id, name, deleted_at, created_at, updated_at"
 
-type postgresRepository struct {
-	pool *pgxpool.Pool
+type scanner interface {
+	Scan(dest ...any) error
 }
 
-func NewRepository(pool *pgxpool.Pool) Repository {
-	return &postgresRepository{pool: pool}
+type mysqlRepository struct {
+	db *sql.DB
 }
 
-func (r *postgresRepository) Create(ctx context.Context, folder *Folder) (*Folder, error) {
-	query := fmt.Sprintf("INSERT INTO folders (id, owner_id, parent_id, name) VALUES ($1, $2, $3, $4) RETURNING %s", columns)
+func NewRepository(db *sql.DB) Repository {
+	return &mysqlRepository{db: db}
+}
 
-	created, err := scanFolder(r.pool.QueryRow(ctx, query, folder.ID, folder.OwnerID, folder.ParentID, folder.Name))
-	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation {
+func (r *mysqlRepository) Create(ctx context.Context, folder *Folder) (*Folder, error) {
+	query := "INSERT INTO folders (id, owner_id, parent_id, name) VALUES (?, ?, ?, ?)"
+
+	if _, err := r.db.ExecContext(ctx, query, folder.ID, folder.OwnerID, folder.ParentID, folder.Name); err != nil {
+		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY {
 			return nil, errs.ErrConflict
 		}
 
 		return nil, err
 	}
 
-	return created, nil
+	return r.Get(ctx, folder.OwnerID, folder.ID)
 }
 
-func (r *postgresRepository) Get(ctx context.Context, ownerID, folderID uuid.UUID) (*Folder, error) {
-	query := fmt.Sprintf("SELECT %s FROM folders WHERE id = $1 AND owner_id = $2 AND deleted_at IS NULL", columns)
+func (r *mysqlRepository) Get(ctx context.Context, ownerID, folderID uuid.UUID) (*Folder, error) {
+	query := fmt.Sprintf("SELECT %s FROM folders WHERE id = ? AND owner_id = ? AND deleted_at IS NULL", columns)
 
-	folder, err := scanFolder(r.pool.QueryRow(ctx, query, folderID, ownerID))
+	folder, err := scanFolder(r.db.QueryRowContext(ctx, query, folderID, ownerID))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errs.ErrNotFound
 		}
 
@@ -53,58 +55,62 @@ func (r *postgresRepository) Get(ctx context.Context, ownerID, folderID uuid.UUI
 	return folder, nil
 }
 
-func (r *postgresRepository) List(ctx context.Context, ownerID uuid.UUID, parentID *uuid.UUID) ([]*Folder, error) {
-	query := fmt.Sprintf("SELECT %s FROM folders WHERE owner_id = $1 AND parent_id IS NOT DISTINCT FROM $2 AND deleted_at IS NULL ORDER BY lower(name)", columns)
+func (r *mysqlRepository) List(ctx context.Context, ownerID uuid.UUID, parentID *uuid.UUID) ([]*Folder, error) {
+	query := fmt.Sprintf("SELECT %s FROM folders WHERE owner_id = ? AND parent_id <=> ? AND deleted_at IS NULL ORDER BY name", columns)
 
-	rows, err := r.pool.Query(ctx, query, ownerID, parentID)
+	rows, err := r.db.QueryContext(ctx, query, ownerID, parentID)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (*Folder, error) {
-		return scanFolder(row)
-	})
-}
+	folders := []*Folder{}
 
-func (r *postgresRepository) Rename(ctx context.Context, ownerID, folderID uuid.UUID, name string) (*Folder, error) {
-	query := fmt.Sprintf("UPDATE folders SET name = $1, updated_at = now() WHERE id = $2 AND owner_id = $3 AND deleted_at IS NULL RETURNING %s", columns)
-
-	renamed, err := scanFolder(r.pool.QueryRow(ctx, query, name, folderID, ownerID))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.ErrNotFound
+	for rows.Next() {
+		folder, err := scanFolder(rows)
+		if err != nil {
+			return nil, err
 		}
 
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation {
+		folders = append(folders, folder)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return folders, nil
+}
+
+func (r *mysqlRepository) Rename(ctx context.Context, ownerID, folderID uuid.UUID, name string) (*Folder, error) {
+	query := "UPDATE folders SET name = ? WHERE id = ? AND owner_id = ? AND deleted_at IS NULL"
+
+	if _, err := r.db.ExecContext(ctx, query, name, folderID, ownerID); err != nil {
+		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY {
 			return nil, errs.ErrConflict
 		}
 
 		return nil, err
 	}
 
-	return renamed, nil
+	return r.Get(ctx, ownerID, folderID)
 }
 
-func (r *postgresRepository) Move(ctx context.Context, ownerID, folderID uuid.UUID, newParentID *uuid.UUID) (*Folder, error) {
-	query := fmt.Sprintf("UPDATE folders SET parent_id = $1, updated_at = now() WHERE id = $2 AND owner_id = $3 AND deleted_at IS NULL RETURNING %s", columns)
+func (r *mysqlRepository) Move(ctx context.Context, ownerID, folderID uuid.UUID, newParentID *uuid.UUID) (*Folder, error) {
+	query := "UPDATE folders SET parent_id = ? WHERE id = ? AND owner_id = ? AND deleted_at IS NULL"
 
-	moved, err := scanFolder(r.pool.QueryRow(ctx, query, newParentID, folderID, ownerID))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.ErrNotFound
-		}
-
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation {
+	if _, err := r.db.ExecContext(ctx, query, newParentID, folderID, ownerID); err != nil {
+		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY {
 			return nil, errs.ErrConflict
 		}
 
 		return nil, err
 	}
 
-	return moved, nil
+	return r.Get(ctx, ownerID, folderID)
 }
 
-func scanFolder(row pgx.Row) (*Folder, error) {
+func scanFolder(row scanner) (*Folder, error) {
 	var folder Folder
 
 	if err := row.Scan(&folder.ID, &folder.OwnerID, &folder.ParentID, &folder.Name, &folder.DeletedAt, &folder.CreatedAt, &folder.UpdatedAt); err != nil {
