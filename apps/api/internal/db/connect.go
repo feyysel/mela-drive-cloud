@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net"
 	"time"
 
 	"github.com/feyysel/mela-drive-cloud/internal/config"
@@ -12,11 +13,12 @@ import (
 )
 
 func Connect(ctx context.Context, cfg config.DBConfig) (*sql.DB, error) {
-	dsn, err := mysql.ParseDSN(cfg.URL)
-	if err != nil {
-		return nil, fmt.Errorf("parse database url: %w", err)
-	}
-
+	dsn := mysql.NewConfig()
+	dsn.User = cfg.User
+	dsn.Passwd = cfg.Password
+	dsn.Net = "tcp"
+	dsn.Addr = net.JoinHostPort(cfg.Host, cfg.Port)
+	dsn.DBName = cfg.Name
 	dsn.ParseTime = true
 	dsn.Loc = time.UTC
 
@@ -33,7 +35,7 @@ func Connect(ctx context.Context, cfg config.DBConfig) (*sql.DB, error) {
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 
-	slog.InfoContext(ctx, "db connected")
+	slog.InfoContext(ctx, "db connected", "host", cfg.Host, "name", cfg.Name)
 
 	return pool, nil
 }
