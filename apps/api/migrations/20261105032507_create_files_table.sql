@@ -1,28 +1,21 @@
 -- +goose Up
 CREATE TABLE files (
-    id          uuid PRIMARY KEY,
-    owner_id    uuid NOT NULL REFERENCES users (id),
-    folder_id   uuid REFERENCES folders (id),
-    name        text NOT NULL,
-    storage_key text NOT NULL UNIQUE,
-    size_bytes  bigint NOT NULL,
-    mime_type   text NOT NULL,
-    deleted_at  timestamptz,
-    created_at  timestamptz NOT NULL DEFAULT now(),
-    updated_at  timestamptz NOT NULL DEFAULT now()
+    id CHAR(36) NOT NULL PRIMARY KEY,
+    owner_id CHAR(36) NOT NULL,
+    folder_id CHAR(36) NULL,
+    name VARCHAR(255) NOT NULL,
+    storage_key VARCHAR(512) NOT NULL UNIQUE,
+    size_bytes BIGINT NOT NULL,
+    mime_type VARCHAR(255) NOT NULL,
+    deleted_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    FOREIGN KEY (owner_id) REFERENCES users (id),
+    FOREIGN KEY (folder_id) REFERENCES folders (id),
+    INDEX files_owner_folder_idx (owner_id, folder_id),
+    INDEX files_trash_idx (deleted_at),
+    UNIQUE INDEX files_unique_name_idx ((IF(deleted_at IS NULL, CONCAT(owner_id, ':', COALESCE(folder_id, 'root'), ':', name), NULL)))
 );
 
-CREATE INDEX files_owner_folder_idx ON files (owner_id, folder_id);
-
-CREATE INDEX files_trash_idx ON files (deleted_at) WHERE deleted_at IS NOT NULL;
-
-CREATE UNIQUE INDEX files_unique_name_idx
-    ON files (owner_id, folder_id, lower(name))
-    WHERE deleted_at IS NULL AND folder_id IS NOT NULL;
-
-CREATE UNIQUE INDEX files_unique_root_name_idx
-    ON files (owner_id, lower(name))
-    WHERE deleted_at IS NULL AND folder_id IS NULL;
-
 -- +goose Down
-DROP TABLE files;
+DROP TABLE IF EXISTS files;
