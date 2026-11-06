@@ -43,14 +43,14 @@ func New(cfg config.Config) (*Container, error) {
 
 	redisClient, err := cache.Connect(ctx, cfg.Redis)
 	if err != nil {
-		pool.Close()
+		_ = pool.Close()
 		return nil, err
 	}
 
 	ok := false
 	defer func() {
 		if !ok {
-			pool.Close()
+			_ = pool.Close()
 			_ = redisClient.Close()
 		}
 	}()
@@ -81,6 +81,6 @@ func New(cfg config.Config) (*Container, error) {
 }
 
 func (c *Container) Close() {
-	c.Pool.Close()
+	_ = c.Pool.Close()
 	_ = c.Redis.Close()
 }

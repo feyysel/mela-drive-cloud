@@ -62,7 +62,9 @@ func (r *mysqlRepository) List(ctx context.Context, ownerID uuid.UUID, parentID 
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	folders := []*Folder{}
 
