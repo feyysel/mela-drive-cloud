@@ -5,7 +5,7 @@ dev:
     air
 
 migrate:
-    goose -dir migrations postgres "$DATABASE_URL" up
+    goose -dir migrations mysql "$DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_NAME?parseTime=true" up
     
 lint:
     golangci-lint run
