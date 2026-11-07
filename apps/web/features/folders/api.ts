@@ -1,60 +1,56 @@
-
 import { api } from "@/store/api"
 import type {
     CreateFolderRequest,
     Folder,
-    RenameFolderArgs,
+    MoveFolderRequest,
+    RenameFolderRequest,
 } from "./types"
 
 export const folderApi = api.injectEndpoints({
     endpoints: (build) => ({
-        listFolders: build.query<Folder[], string | void>({
-            query: (parentId) => ({
-                url: "/folders",
-                params: parentId ? { parentId } : undefined,
-            }),
-            providesTags: (result) => [
-                { type: "Folder", id: "LIST" },
-                ...(result ?? []).map(({ id }) => ({
-                    type: "Folder" as const,
-                    id,
-                })),
-            ],
-        }),
-
         getFolder: build.query<Folder, string>({
             query: (folderId) => `/folders/${folderId}`,
-            providesTags: (_result, _error, folderId) => [
-                { type: "Folder", id: folderId },
-            ],
         }),
-
+        listFolders: build.query<Folder[], string | undefined>({
+            query: (parentId) => ({
+                url: "/folders",
+                params: { parentId },
+            }),
+        }),
         createFolder: build.mutation<Folder, CreateFolderRequest>({
             query: (body) => ({
                 url: "/folders",
                 method: "POST",
                 body,
             }),
-            invalidatesTags: [{ type: "Folder", id: "LIST" }],
         }),
-
-        renameFolder: build.mutation<Folder, RenameFolderArgs>({
-            query: ({ folderId, name }) => ({
+        renameFolder: build.mutation<
+            Folder,
+            { folderId: string } & RenameFolderRequest
+        >({
+            query: ({ folderId, ...body }) => ({
                 url: `/folders/${folderId}/name`,
                 method: "PATCH",
-                body: { name },
+                body,
             }),
-            invalidatesTags: (_result, _error, { folderId }) => [
-                { type: "Folder", id: "LIST" },
-                { type: "Folder", id: folderId },
-            ],
+        }),
+        moveFolder: build.mutation<
+            Folder,
+            { folderId: string } & MoveFolderRequest
+        >({
+            query: ({ folderId, ...body }) => ({
+                url: `/folders/${folderId}/parent`,
+                method: "PATCH",
+                body,
+            }),
         }),
     }),
 })
 
 export const {
-    useListFoldersQuery,
     useGetFolderQuery,
+    useListFoldersQuery,
     useCreateFolderMutation,
     useRenameFolderMutation,
+    useMoveFolderMutation,
 } = folderApi

@@ -9,11 +9,14 @@ export type Folder = {
 }
 
 export type CreateFolderRequest = {
+    parentId: string | null
     name: string
-    parentId?: string | null
 }
 
-export type RenameFolderArgs = {
-    folderId: string
+export type RenameFolderRequest = {
     name: string
+}
+
+export type MoveFolderRequest = {
+    parentId: string | null
 }
