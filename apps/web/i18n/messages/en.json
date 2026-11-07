@@ -51,11 +51,6 @@
     "signup": {
       "title": "Create your account",
       "description": "Store, organize, and share your files with Mela Drive.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "optional": "Optional",
-      "firstNamePlaceholder": "e.g. Abebe",
-      "lastNamePlaceholder": "e.g. Kebede",
       "passwordPlaceholder": "Create a password",
       "passwordHint": "At least 8 characters.",
       "submit": "Create account",

@@ -51,11 +51,6 @@
     "signup": {
       "title": "መለያዎን ይፍጠሩ",
       "description": "ፋይሎችዎን በMela Drive ያከማቹ፣ ያደራጁ እና ያጋሩ።",
-      "firstName": "የመጀመሪያ ስም",
-      "lastName": "የአባት ስም",
-      "optional": "አማራጭ",
-      "firstNamePlaceholder": "ለምሳሌ፦ አበበ",
-      "lastNamePlaceholder": "ለምሳሌ፦ ከበደ",
       "passwordPlaceholder": "የይለፍ ቃል ይፍጠሩ",
       "passwordHint": "ቢያንስ 8 ቁምፊዎች።",
       "submit": "መለያ ፍጠር",

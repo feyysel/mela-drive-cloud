@@ -4,8 +4,6 @@ export type LoginRequest = {
 }
 
 export type SignupRequest = {
-  firstName: string
-  lastName?: string | null
   email: string
   password: string
 }
