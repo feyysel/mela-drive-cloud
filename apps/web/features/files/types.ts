@@ -1,4 +1,3 @@
-// Named DriveFile to avoid clashing with the browser's built-in File type.
 export type DriveFile = {
   id: string
   ownerId: string
@@ -13,16 +12,14 @@ export type DriveFile = {
 }
 
 export type UploadFileRequest = {
-  file: File
-  folderId?: string | null
+  folderId?: string
+  file: Blob
 }
 
 export type RenameFileRequest = {
-  fileId: string
   name: string
 }
 
 export type MoveFileRequest = {
-  fileId: string
   folderId: string | null
 }
