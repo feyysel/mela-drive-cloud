@@ -5,12 +5,12 @@ import (
 	"io"
 
 	"github.com/feyysel/mela-drive-cloud/internal/folder"
-	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/google/uuid"
 )
 
 type UserService interface {
-	GetByID(ctx context.Context, userID uuid.UUID) (*user.User, error)
+	ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes, quotaBytes int64) error
+	ReleaseStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error
 }
 
 type FolderService interface {

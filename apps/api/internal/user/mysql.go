@@ -105,6 +105,38 @@ func (r *mysqlRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, 
 	return r.GetByID(ctx, userID)
 }
 
+func (r *mysqlRepository) ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes, quotaBytes int64) error {
+	query := "UPDATE users SET storage_used_bytes = storage_used_bytes + ? WHERE id = ? AND storage_used_bytes + ? <= ?"
+
+	result, err := r.db.ExecContext(ctx, query, sizeBytes, userID, sizeBytes, quotaBytes)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		if _, err := r.GetByID(ctx, userID); err != nil {
+			return err
+		}
+
+		return errs.ErrConflict
+	}
+
+	return nil
+}
+
+func (r *mysqlRepository) ReleaseStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	query := "UPDATE users SET storage_used_bytes = GREATEST(storage_used_bytes - ?, 0) WHERE id = ?"
+
+	_, err := r.db.ExecContext(ctx, query, sizeBytes, userID)
+
+	return err
+}
+
 func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 	query := "DELETE FROM users WHERE id = ?"
 
