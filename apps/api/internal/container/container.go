@@ -9,11 +9,13 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/cache"
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/db"
+	"github.com/feyysel/mela-drive-cloud/internal/file"
 	"github.com/feyysel/mela-drive-cloud/internal/folder"
 	"github.com/feyysel/mela-drive-cloud/internal/healthz"
 	"github.com/feyysel/mela-drive-cloud/internal/mail"
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
+	"github.com/feyysel/mela-drive-cloud/internal/storage"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/redis/go-redis/v9"
 	"github.com/resend/resend-go/v4"
@@ -28,6 +30,7 @@ type Container struct {
 	HealthzHandler      *healthz.Handler
 	UserHandler         *user.Handler
 	FolderHandler       *folder.Handler
+	FileHandler         *file.Handler
 	AuthHandler         *auth.Handler
 }
 
@@ -57,11 +60,13 @@ func New(cfg config.Config) (*Container, error) {
 	resendClient := resend.NewClient(cfg.Mail.APIKey)
 
 	healthSvc := healthz.NewService(cfg.App)
-	userSvc := user.NewService(user.NewRepository(pool), user.NewCache(redisClient), cfg.App)
+	userSvc := user.NewService(user.NewRepository(pool), user.NewCache(redisClient))
 	sessSvc := session.NewService(session.NewCache(redisClient), cfg.Session)
 	mailSvc := mail.NewService(resendClient)
 	authSvc := auth.NewService(auth.NewCache(redisClient), userSvc, sessSvc, mailSvc, cfg.App, cfg.Mail)
 	folderSvc := folder.NewService(folder.NewRepository(pool))
+	storageSvc := storage.NewService(cfg.Storage)
+	fileSvc := file.NewService(file.NewRepository(pool), userSvc, folderSvc, storageSvc)
 
 	ok = true
 
@@ -74,6 +79,7 @@ func New(cfg config.Config) (*Container, error) {
 		HealthzHandler:      healthz.NewHandler(healthSvc),
 		UserHandler:         user.NewHandler(userSvc),
 		FolderHandler:       folder.NewHandler(folderSvc),
+		FileHandler:         file.NewHandler(fileSvc),
 		AuthHandler:         auth.NewHandler(authSvc, cfg.Session),
 	}, nil
 }
