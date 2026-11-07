@@ -5,7 +5,8 @@ CREATE TABLE users (
     last_name VARCHAR(50) NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('owner', 'admin', 'member')),
+    storage_used_bytes BIGINT NOT NULL DEFAULT 0 CHECK (storage_used_bytes >= 0),
+    storage_quota_bytes BIGINT NOT NULL DEFAULT 1073741824 CHECK (storage_quota_bytes >= 0),
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
 );

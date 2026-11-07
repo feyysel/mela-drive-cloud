@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/emailx"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
 	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
@@ -14,25 +13,24 @@ import (
 )
 
 const (
-	msgUserNotFound = "User not found"
-	msgEmailInUse   = "Email already in use"
+	msgUserNotFound  = "User not found"
+	msgEmailInUse    = "Email already in use"
+	msgQuotaExceeded = "Storage quota exceeded"
 )
 
 type Service struct {
-	repo   Repository
-	cache  Cache
-	appCfg config.AppConfig
+	repo  Repository
+	cache Cache
 }
 
-func NewService(repo Repository, cache Cache, appCfg config.AppConfig) *Service {
+func NewService(repo Repository, cache Cache) *Service {
 	return &Service{
-		repo:   repo,
-		cache:  cache,
-		appCfg: appCfg,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
-func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, password string, role UserRole) (*User, error) {
+func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, password string) (*User, error) {
 	if err := requireValidPassword(password); err != nil {
 		return nil, err
 	}
@@ -46,7 +44,7 @@ func (s *Service) Create(ctx context.Context, firstName string, lastName *string
 		return nil, err
 	}
 
-	user, err := NewUser(firstName, lastName, email, string(hash), role)
+	user, err := NewUser(firstName, lastName, email, string(hash))
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +180,54 @@ func (s *Service) UpdatePassword(ctx context.Context, userID uuid.UUID, password
 	return updated, nil
 }
 
+func (s *Service) ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	if sizeBytes < 0 {
+		return errs.Wrap(errs.ErrInvalidInput, "Invalid storage size")
+	}
+
+	if sizeBytes == 0 {
+		return nil
+	}
+
+	if err := s.repo.ReserveStorage(ctx, userID, sizeBytes); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgUserNotFound)
+		}
+
+		if errors.Is(err, errs.ErrConflict) {
+			return errs.Wrap(errs.ErrConflict, msgQuotaExceeded)
+		}
+
+		return err
+	}
+
+	if err := s.cache.Del(ctx, userSnapshotKey(userID)); err != nil {
+		slog.WarnContext(ctx, "failed to invalidate user snapshot", "user_id", userID, "err", err)
+	}
+
+	return nil
+}
+
+func (s *Service) ReleaseStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	if sizeBytes < 0 {
+		return errs.Wrap(errs.ErrInvalidInput, "Invalid storage size")
+	}
+
+	if sizeBytes == 0 {
+		return nil
+	}
+
+	if err := s.repo.ReleaseStorage(ctx, userID, sizeBytes); err != nil {
+		return err
+	}
+
+	if err := s.cache.Del(ctx, userSnapshotKey(userID)); err != nil {
+		slog.WarnContext(ctx, "failed to invalidate user snapshot", "user_id", userID, "err", err)
+	}
+
+	return nil
+}
+
 func (s *Service) Delete(ctx context.Context, userID uuid.UUID) error {
 	if err := s.repo.Delete(ctx, userID); err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
@@ -190,48 +236,6 @@ func (s *Service) Delete(ctx context.Context, userID uuid.UUID) error {
 
 		return err
 	}
-
-	return nil
-}
-
-func (s *Service) SeedOwner(ctx context.Context) error {
-	if err := requireValidPassword(s.appCfg.OwnerPassword); err != nil {
-		return err
-	}
-
-	hash, err := bcrypt.GenerateFromPassword([]byte(s.appCfg.OwnerPassword), bcrypt.DefaultCost)
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
-			return errs.Wrap(errs.ErrInvalidInput, "Password is too long")
-		}
-
-		return err
-	}
-
-	count, err := s.repo.CountByRole(ctx, UserRoleOwner)
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		return nil
-	}
-
-	user, err := NewUser("Owner", nil, s.appCfg.OwnerEmail, string(hash), UserRoleOwner)
-	if err != nil {
-		return err
-	}
-
-	owner, err := s.repo.Create(ctx, user)
-	if err != nil {
-		if errors.Is(err, errs.ErrConflict) {
-			return errs.Wrap(errs.ErrConflict, msgEmailInUse)
-		}
-
-		return err
-	}
-
-	slog.InfoContext(ctx, "owner seeded", "email", emailx.Mask(owner.Email))
 
 	return nil
 }

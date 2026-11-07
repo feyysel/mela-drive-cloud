@@ -9,13 +9,11 @@ import (
 const (
 	keyUserID    = "userID"
 	keyUserEmail = "userEmail"
-	keyUserRole  = "userRole"
 )
 
-func SetUserContext(ctx *gin.Context, userID uuid.UUID, email string, role string) {
+func SetUserContext(ctx *gin.Context, userID uuid.UUID, email string) {
 	ctx.Set(keyUserID, userID)
 	ctx.Set(keyUserEmail, email)
-	ctx.Set(keyUserRole, role)
 }
 
 func UserID(ctx *gin.Context) (uuid.UUID, error) {
@@ -44,18 +42,4 @@ func UserEmail(ctx *gin.Context) (string, error) {
 	}
 
 	return email, nil
-}
-
-func UserRole(ctx *gin.Context) (string, error) {
-	value, exists := ctx.Get(keyUserRole)
-	if !exists {
-		return "", errs.Wrap(errs.ErrInternal, "user role missing from context")
-	}
-
-	role, ok := value.(string)
-	if !ok {
-		return "", errs.Wrap(errs.ErrInternal, "user role has unexpected type")
-	}
-
-	return role, nil
 }

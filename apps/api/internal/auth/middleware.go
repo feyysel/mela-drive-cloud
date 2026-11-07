@@ -61,7 +61,7 @@ func (m *Middleware) RequireAuth() gin.HandlerFunc {
 		}
 
 		ginx.SetSessionID(ctx, session.ID)
-		ginx.SetUserContext(ctx, userSnapshot.ID, userSnapshot.Email, string(userSnapshot.Role))
+		ginx.SetUserContext(ctx, userSnapshot.ID, userSnapshot.Email)
 
 		ctx.Next()
 	}

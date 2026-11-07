@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	columns = "id, first_name, last_name, email, password_hash, role, created_at, updated_at"
+	columns = "id, first_name, last_name, email, password_hash, storage_used_bytes, storage_quota_bytes, created_at, updated_at"
 
 	keyEmail = "users.email"
 )
@@ -28,9 +28,9 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *mysqlRepository) Create(ctx context.Context, user *User) (*User, error) {
-	query := "INSERT INTO users (id, first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO users (id, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)"
 
-	if _, err := r.db.ExecContext(ctx, query, user.ID, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.Role); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, user.ID, user.FirstName, user.LastName, user.Email, user.PasswordHash); err != nil {
 		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(mysqlErr.Message, keyEmail) {
 			return nil, errs.ErrConflict
 		}
@@ -71,17 +71,6 @@ func (r *mysqlRepository) GetByEmail(ctx context.Context, email string) (*User, 
 	return user, nil
 }
 
-func (r *mysqlRepository) CountByRole(ctx context.Context, role UserRole) (int, error) {
-	query := "SELECT COUNT(*) FROM users WHERE role = ?"
-
-	var count int
-	if err := r.db.QueryRowContext(ctx, query, role).Scan(&count); err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
-
 func (r *mysqlRepository) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
 	query := "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?"
 
@@ -116,6 +105,38 @@ func (r *mysqlRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, 
 	return r.GetByID(ctx, userID)
 }
 
+func (r *mysqlRepository) ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	query := "UPDATE users SET storage_used_bytes = storage_used_bytes + ? WHERE id = ? AND storage_used_bytes + ? <= storage_quota_bytes"
+
+	result, err := r.db.ExecContext(ctx, query, sizeBytes, userID, sizeBytes)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		if _, err := r.GetByID(ctx, userID); err != nil {
+			return err
+		}
+
+		return errs.ErrConflict
+	}
+
+	return nil
+}
+
+func (r *mysqlRepository) ReleaseStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	query := "UPDATE users SET storage_used_bytes = GREATEST(storage_used_bytes - ?, 0) WHERE id = ?"
+
+	_, err := r.db.ExecContext(ctx, query, sizeBytes, userID)
+
+	return err
+}
+
 func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 	query := "DELETE FROM users WHERE id = ?"
 
@@ -139,7 +160,7 @@ func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 func scanUser(row *sql.Row) (*User, error) {
 	var user User
 
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.StorageUsedBytes, &user.StorageQuotaBytes, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		return nil, err
 	}
 

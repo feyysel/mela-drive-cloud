@@ -10,7 +10,6 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/config"
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
-	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,7 +37,7 @@ func NewService(cache Cache, userSvc UserService, sessionSvc SessionService, mai
 }
 
 func (s *Service) Signup(ctx context.Context, firstName string, lastName *string, email, password, ip, userAgent string) (*session.Session, error) {
-	u, err := s.userSvc.Create(ctx, firstName, lastName, email, password, user.UserRoleMember)
+	u, err := s.userSvc.Create(ctx, firstName, lastName, email, password)
 	if err != nil {
 		return nil, err
 	}
