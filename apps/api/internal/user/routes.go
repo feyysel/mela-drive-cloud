@@ -8,11 +8,8 @@ import (
 
 func RegisterRoutes(router *gin.RouterGroup, handler *Handler, limit *ratelimit.Middleware) {
 	general := limit.RateLimit("user_general", ratelimit.General)
-	sensitive := limit.RateLimit("user_sensitive", ratelimit.Sensitive)
 
 	me := router.Group("/me")
 
 	me.GET("", general, handler.Get)
-	me.PATCH("/email", sensitive, handler.UpdateEmail)
-	me.DELETE("", sensitive, handler.Delete)
 }
