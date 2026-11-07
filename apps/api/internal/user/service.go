@@ -30,7 +30,7 @@ func NewService(repo Repository, cache Cache) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, firstName string, lastName *string, email string, password string) (*User, error) {
+func (s *Service) Create(ctx context.Context, email string, password string) (*User, error) {
 	if err := requireValidPassword(password); err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (s *Service) Create(ctx context.Context, firstName string, lastName *string
 		return nil, err
 	}
 
-	user, err := NewUser(firstName, lastName, email, string(hash))
+	user, err := NewUser(email, string(hash))
 	if err != nil {
 		return nil, err
 	}
@@ -107,29 +107,6 @@ func (s *Service) GetByEmail(ctx context.Context, email string) (*User, error) {
 	}
 
 	return user, nil
-}
-
-func (s *Service) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
-	trimmedFirstName := stringsx.Trim(firstName)
-	if err := requireValidFirstName(trimmedFirstName); err != nil {
-		return nil, err
-	}
-
-	trimmedLastName := stringsx.TrimOptional(lastName)
-	if err := requireValidLastName(trimmedLastName); err != nil {
-		return nil, err
-	}
-
-	updated, err := s.repo.UpdateName(ctx, userID, trimmedFirstName, trimmedLastName)
-	if err != nil {
-		if errors.Is(err, errs.ErrNotFound) {
-			return nil, errs.Wrap(errs.ErrNotFound, msgUserNotFound)
-		}
-
-		return nil, err
-	}
-
-	return updated, nil
 }
 
 func (s *Service) UpdateEmail(ctx context.Context, userID uuid.UUID, email string) (*User, error) {

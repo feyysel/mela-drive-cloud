@@ -36,8 +36,8 @@ func NewService(cache Cache, userSvc UserService, sessionSvc SessionService, mai
 	}
 }
 
-func (s *Service) Signup(ctx context.Context, firstName string, lastName *string, email, password, ip, userAgent string) (*session.Session, error) {
-	u, err := s.userSvc.Create(ctx, firstName, lastName, email, password)
+func (s *Service) Signup(ctx context.Context, email, password, ip, userAgent string) (*session.Session, error) {
+	u, err := s.userSvc.Create(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,6 @@ func (s *Service) ForgotPassword(ctx context.Context, email, origin string) erro
 		[]string{u.Email},
 		"reset-password-email-template",
 		map[string]any{
-			"NAME":       u.FirstName,
 			"RESET_LINK": origin + "/reset-password?token=" + token,
 		},
 	)

@@ -30,28 +30,6 @@ func (h *Handler) Get(ctx *gin.Context) {
 	res.OK(ctx, snapshot)
 }
 
-func (h *Handler) UpdateName(ctx *gin.Context) {
-	userID, err := ginx.UserID(ctx)
-	if err != nil {
-		res.Error(ctx, err)
-		return
-	}
-
-	var req UpdateUserNameRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		res.Error(ctx, err)
-		return
-	}
-
-	user, err := h.svc.UpdateName(ctx, userID, req.FirstName, req.LastName)
-	if err != nil {
-		res.Error(ctx, err)
-		return
-	}
-
-	res.OK(ctx, user)
-}
-
 func (h *Handler) UpdateEmail(ctx *gin.Context) {
 	userID, err := ginx.UserID(ctx)
 	if err != nil {

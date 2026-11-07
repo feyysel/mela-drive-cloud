@@ -8,36 +8,6 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
 )
 
-func requireValidFirstName(firstName string) error {
-	if firstName == "" {
-		return errs.Wrap(errs.ErrInvalidInput, "First name is required")
-	}
-
-	length := utf8.RuneCountInString(firstName)
-
-	if length < 2 {
-		return errs.Wrap(errs.ErrInvalidInput, "First name is too short")
-	}
-
-	if length > 50 {
-		return errs.Wrap(errs.ErrInvalidInput, "First name is too long")
-	}
-
-	return nil
-}
-
-func requireValidLastName(lastName *string) error {
-	if lastName == nil {
-		return nil
-	}
-
-	if utf8.RuneCountInString(*lastName) > 50 {
-		return errs.Wrap(errs.ErrInvalidInput, "Last name is too long")
-	}
-
-	return nil
-}
-
 func requireValidEmail(email string) error {
 	if email == "" {
 		return errs.Wrap(errs.ErrInvalidInput, "Email is required")

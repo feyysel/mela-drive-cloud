@@ -28,7 +28,7 @@ func (h *Handler) Signup(ctx *gin.Context) {
 		return
 	}
 
-	sess, err := h.svc.Signup(ctx, req.FirstName, req.LastName, req.Email, req.Password, ctx.ClientIP(), ctx.Request.UserAgent())
+	sess, err := h.svc.Signup(ctx, req.Email, req.Password, ctx.ClientIP(), ctx.Request.UserAgent())
 	if err != nil {
 		res.Error(ctx, err)
 		return

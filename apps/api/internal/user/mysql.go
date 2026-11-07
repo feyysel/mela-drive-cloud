@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	columns = "id, first_name, last_name, email, password_hash, storage_used_bytes, storage_quota_bytes, created_at, updated_at"
+	columns = "id, email, password_hash, storage_used_bytes, storage_quota_bytes, created_at, updated_at"
 
 	keyEmail = "users.email"
 )
@@ -28,9 +28,9 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *mysqlRepository) Create(ctx context.Context, user *User) (*User, error) {
-	query := "INSERT INTO users (id, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)"
 
-	if _, err := r.db.ExecContext(ctx, query, user.ID, user.FirstName, user.LastName, user.Email, user.PasswordHash); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, user.ID, user.Email, user.PasswordHash); err != nil {
 		if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok && mysqlErr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(mysqlErr.Message, keyEmail) {
 			return nil, errs.ErrConflict
 		}
@@ -69,16 +69,6 @@ func (r *mysqlRepository) GetByEmail(ctx context.Context, email string) (*User, 
 	}
 
 	return user, nil
-}
-
-func (r *mysqlRepository) UpdateName(ctx context.Context, userID uuid.UUID, firstName string, lastName *string) (*User, error) {
-	query := "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?"
-
-	if _, err := r.db.ExecContext(ctx, query, firstName, lastName, userID); err != nil {
-		return nil, err
-	}
-
-	return r.GetByID(ctx, userID)
 }
 
 func (r *mysqlRepository) UpdateEmail(ctx context.Context, userID uuid.UUID, email string) (*User, error) {
@@ -160,7 +150,7 @@ func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 func scanUser(row *sql.Row) (*User, error) {
 	var user User
 
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.StorageUsedBytes, &user.StorageQuotaBytes, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	if err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.StorageUsedBytes, &user.StorageQuotaBytes, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		return nil, err
 	}
 
