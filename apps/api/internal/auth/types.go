@@ -6,10 +6,8 @@ type LoginRequest struct {
 }
 
 type SignupRequest struct {
-	FirstName string  `json:"firstName" binding:"required"`
-	LastName  *string `json:"lastName"`
-	Email     string  `json:"email" binding:"required"`
-	Password  string  `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type ForgotPasswordRequest struct {

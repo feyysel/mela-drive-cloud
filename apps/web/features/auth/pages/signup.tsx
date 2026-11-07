@@ -1,6 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -40,18 +39,12 @@ export function Signup() {
   const router = useRouter()
   const [signup, { isLoading }] = useSignupMutation()
   const [form, setForm] = useState<SignupRequest>({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
   })
   const [showPassword, setShowPassword] = useState(false)
 
-  const canSubmit =
-    !!form.firstName &&
-    !!form.email &&
-    !!form.password &&
-    form.password.length >= 8
+  const canSubmit = !!form.email && !!form.password && form.password.length >= 8
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -59,10 +52,7 @@ export function Signup() {
     if (!canSubmit) return
 
     try {
-      await signup({
-        ...form,
-        lastName: form.lastName || null,
-      }).unwrap()
+      await signup(form).unwrap()
       router.replace("/")
     } catch (error: unknown) {
       toast.add({ type: "error", title: parseErr(error).message })
@@ -80,45 +70,6 @@ export function Signup() {
           <form onSubmit={handleSubmit}>
             <FieldSet>
               <FieldGroup>
-                <Field orientation="horizontal">
-                  <Field>
-                    <FieldLabel htmlFor="firstName">
-                      {t("firstName")}
-                    </FieldLabel>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      autoComplete="given-name"
-                      placeholder={t("firstNamePlaceholder")}
-                      value={form.firstName}
-                      required
-                      disabled={isLoading}
-                      autoFocus
-                      onChange={(e) =>
-                        setForm({ ...form, firstName: e.target.value })
-                      }
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel htmlFor="lastName">
-                      {t("lastName")}
-                      <Badge variant="outline">{t("optional")}</Badge>
-                    </FieldLabel>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      autoComplete="family-name"
-                      placeholder={t("lastNamePlaceholder")}
-                      value={form.lastName ?? ""}
-                      disabled={isLoading}
-                      onChange={(e) =>
-                        setForm({ ...form, lastName: e.target.value })
-                      }
-                    />
-                  </Field>
-                </Field>
-
                 <Field>
                   <FieldLabel htmlFor="email">{auth("email")}</FieldLabel>
                   <Input

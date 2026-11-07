@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	Create(ctx context.Context, firstName string, lastName *string, email string, password string) (*user.User, error)
+	Create(ctx context.Context, email string, password string) (*user.User, error)
 	GetByEmail(ctx context.Context, email string) (*user.User, error)
 	GetSnapshot(ctx context.Context, userID uuid.UUID) (*user.User, error)
 	UpdatePassword(ctx context.Context, userID uuid.UUID, password string) (*user.User, error)
