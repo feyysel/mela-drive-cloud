@@ -20,7 +20,6 @@ const (
 	msgFolderNotFound = "Folder not found"
 	msgNameInUse      = "A file with this name already exists here"
 
-	quotaBytes     = 1 << 30
 	sniffSize      = 512
 	cleanupTimeout = 10 * time.Second
 )
@@ -71,7 +70,7 @@ func (s *Service) Upload(ctx context.Context, ownerID uuid.UUID, folderID *uuid.
 		}
 	}
 
-	if err := s.userSvc.ReserveStorage(ctx, ownerID, sizeBytes, quotaBytes); err != nil {
+	if err := s.userSvc.ReserveStorage(ctx, ownerID, sizeBytes); err != nil {
 		return nil, err
 	}
 

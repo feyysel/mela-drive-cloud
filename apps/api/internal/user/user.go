@@ -9,14 +9,15 @@ import (
 )
 
 type User struct {
-	ID               uuid.UUID `json:"id"`
-	FirstName        string    `json:"firstName"`
-	LastName         *string   `json:"lastName"`
-	Email            string    `json:"email"`
-	PasswordHash     string    `json:"-"`
-	StorageUsedBytes int64     `json:"storageUsedBytes"`
-	CreatedAt        time.Time `json:"createdAt"`
-	UpdatedAt        time.Time `json:"updatedAt"`
+	ID                uuid.UUID `json:"id"`
+	FirstName         string    `json:"firstName"`
+	LastName          *string   `json:"lastName"`
+	Email             string    `json:"email"`
+	PasswordHash      string    `json:"-"`
+	StorageUsedBytes  int64     `json:"storageUsedBytes"`
+	StorageQuotaBytes int64     `json:"storageQuotaBytes"`
+	CreatedAt         time.Time `json:"createdAt"`
+	UpdatedAt         time.Time `json:"updatedAt"`
 }
 
 func NewUser(firstName string, lastName *string, email string, passwordHash string) (*User, error) {

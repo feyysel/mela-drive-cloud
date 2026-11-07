@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	columns = "id, first_name, last_name, email, password_hash, storage_used_bytes, created_at, updated_at"
+	columns = "id, first_name, last_name, email, password_hash, storage_used_bytes, storage_quota_bytes, created_at, updated_at"
 
 	keyEmail = "users.email"
 )
@@ -105,10 +105,10 @@ func (r *mysqlRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, 
 	return r.GetByID(ctx, userID)
 }
 
-func (r *mysqlRepository) ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes, quotaBytes int64) error {
-	query := "UPDATE users SET storage_used_bytes = storage_used_bytes + ? WHERE id = ? AND storage_used_bytes + ? <= ?"
+func (r *mysqlRepository) ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error {
+	query := "UPDATE users SET storage_used_bytes = storage_used_bytes + ? WHERE id = ? AND storage_used_bytes + ? <= storage_quota_bytes"
 
-	result, err := r.db.ExecContext(ctx, query, sizeBytes, userID, sizeBytes, quotaBytes)
+	result, err := r.db.ExecContext(ctx, query, sizeBytes, userID, sizeBytes)
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func (r *mysqlRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 func scanUser(row *sql.Row) (*User, error) {
 	var user User
 
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.StorageUsedBytes, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash, &user.StorageUsedBytes, &user.StorageQuotaBytes, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		return nil, err
 	}
 

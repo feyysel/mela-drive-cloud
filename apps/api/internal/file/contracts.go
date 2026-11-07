@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes, quotaBytes int64) error
+	ReserveStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error
 	ReleaseStorage(ctx context.Context, userID uuid.UUID, sizeBytes int64) error
 }
 
