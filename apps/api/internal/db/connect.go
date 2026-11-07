@@ -2,31 +2,40 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
+	"net"
+	"time"
 
 	"github.com/feyysel/mela-drive-cloud/internal/config"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-sql-driver/mysql"
 )
 
-func Connect(ctx context.Context, cfg config.DBConfig) (*pgxpool.Pool, error) {
-	poolCfg, err := pgxpool.ParseConfig(cfg.URL)
+func Connect(ctx context.Context, cfg config.DBConfig) (*sql.DB, error) {
+	dsn := mysql.NewConfig()
+	dsn.User = cfg.User
+	dsn.Passwd = cfg.Password
+	dsn.Net = "tcp"
+	dsn.Addr = net.JoinHostPort(cfg.Host, cfg.Port)
+	dsn.DBName = cfg.Name
+	dsn.ParseTime = true
+	dsn.Loc = time.UTC
+
+	connector, err := mysql.NewConnector(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("parse database url: %w", err)
+		return nil, fmt.Errorf("create connector: %w", err)
 	}
 
-	pool, err := pgxpool.NewWithConfig(ctx, poolCfg)
-	if err != nil {
-		return nil, fmt.Errorf("create pool: %w", err)
-	}
+	pool := sql.OpenDB(connector)
 
-	if err := pool.Ping(ctx); err != nil {
-		pool.Close()
+	if err := pool.PingContext(ctx); err != nil {
+		_ = pool.Close()
 
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 
-	slog.InfoContext(ctx, "db connected", "host", poolCfg.ConnConfig.Host, "name", poolCfg.ConnConfig.Database)
+	slog.InfoContext(ctx, "db connected", "host", cfg.Host, "name", cfg.Name)
 
 	return pool, nil
 }

@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/feyysel/mela-drive-cloud/internal/auth"
@@ -14,14 +15,13 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/resend/resend-go/v4"
 )
 
 type Container struct {
 	Cfg                 config.Config
-	Pool                *pgxpool.Pool
+	Pool                *sql.DB
 	Redis               *redis.Client
 	RateLimitMiddleware *ratelimit.Middleware
 	AuthMiddleware      *auth.Middleware
@@ -43,14 +43,14 @@ func New(cfg config.Config) (*Container, error) {
 
 	redisClient, err := cache.Connect(ctx, cfg.Redis)
 	if err != nil {
-		pool.Close()
+		_ = pool.Close()
 		return nil, err
 	}
 
 	ok := false
 	defer func() {
 		if !ok {
-			pool.Close()
+			_ = pool.Close()
 			_ = redisClient.Close()
 		}
 	}()
@@ -81,6 +81,6 @@ func New(cfg config.Config) (*Container, error) {
 }
 
 func (c *Container) Close() {
-	c.Pool.Close()
+	_ = c.Pool.Close()
 	_ = c.Redis.Close()
 }
