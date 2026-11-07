@@ -17,7 +17,7 @@ Mela Drive is a file management platform for securely storing, organizing, previ
 
 ### Prerequisites
 
-- `Go`, `Node.js`, `pnpm`, `Just`, `PostgreSQL`, `Redis`.
+- `Go`, `Node.js`, `pnpm`, `Just`.
 
 Cloudflare R2 credentials and Mela Auth configuration are required for the corresponding features.
 
@@ -43,18 +43,14 @@ cd apps/web
 pnpm install
 ```
 
-**4. Start PostgreSQL and Redis**
-
-Ensure both services are running and configured in your environment.
-
-**5. Run database migrations**
+**4. Run database migrations**
 
 ```bash
 cd apps/api
 just migrate
 ```
 
-**6. Start the applications**
+**5. Start the applications**
 
 Run the API and web application using their respective development commands.
 
