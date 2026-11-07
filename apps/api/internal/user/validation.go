@@ -69,11 +69,3 @@ func requireValidPasswordHash(passwordHash string) error {
 
 	return nil
 }
-
-func requireValidRole(role UserRole) error {
-	if !role.IsValid() {
-		return errs.Wrap(errs.ErrInvalidInput, "Invalid role")
-	}
-
-	return nil
-}

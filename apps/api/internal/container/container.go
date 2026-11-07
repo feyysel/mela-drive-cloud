@@ -25,7 +25,6 @@ type Container struct {
 	Redis               *redis.Client
 	RateLimitMiddleware *ratelimit.Middleware
 	AuthMiddleware      *auth.Middleware
-	UserSvc             *user.Service
 	HealthzHandler      *healthz.Handler
 	UserHandler         *user.Handler
 	FolderHandler       *folder.Handler
@@ -72,7 +71,6 @@ func New(cfg config.Config) (*Container, error) {
 		Redis:               redisClient,
 		RateLimitMiddleware: ratelimit.NewMiddleware(redisClient),
 		AuthMiddleware:      auth.NewMiddleware(sessSvc, userSvc, cfg.Session),
-		UserSvc:             userSvc,
 		HealthzHandler:      healthz.NewHandler(healthSvc),
 		UserHandler:         user.NewHandler(userSvc),
 		FolderHandler:       folder.NewHandler(folderSvc),

@@ -9,17 +9,17 @@ import (
 )
 
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	FirstName    string    `json:"firstName"`
-	LastName     *string   `json:"lastName"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"-"`
-	Role         UserRole  `json:"role"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ID               uuid.UUID `json:"id"`
+	FirstName        string    `json:"firstName"`
+	LastName         *string   `json:"lastName"`
+	Email            string    `json:"email"`
+	PasswordHash     string    `json:"-"`
+	StorageUsedBytes int64     `json:"storageUsedBytes"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
 }
 
-func NewUser(firstName string, lastName *string, email string, passwordHash string, role UserRole) (*User, error) {
+func NewUser(firstName string, lastName *string, email string, passwordHash string) (*User, error) {
 	trimmedFirstName := stringsx.Trim(firstName)
 	if err := requireValidFirstName(trimmedFirstName); err != nil {
 		return nil, err
@@ -38,10 +38,6 @@ func NewUser(firstName string, lastName *string, email string, passwordHash stri
 		return nil, err
 	}
 
-	if err := requireValidRole(role); err != nil {
-		return nil, err
-	}
-
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
@@ -49,10 +45,9 @@ func NewUser(firstName string, lastName *string, email string, passwordHash stri
 
 	return &User{
 		ID:           id,
-		FirstName:    firstName,
-		LastName:     lastName,
+		FirstName:    trimmedFirstName,
+		LastName:     trimmedLastName,
 		Email:        emailx.Normalize(email),
 		PasswordHash: passwordHash,
-		Role:         role,
 	}, nil
 }
