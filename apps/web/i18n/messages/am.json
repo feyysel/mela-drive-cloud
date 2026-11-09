@@ -57,5 +57,11 @@
       "alreadyHaveAccount": "አስቀድመው መለያ አለዎት?",
       "login": "ግባ"
     }
+  },
+  "navigation": {
+    "myDrive": "የእኔ ድራይቭ",
+    "trash": "መጣያ",
+    "storage": "ማከማቻ",
+    "storageUsed": "ከ {quota} {used} ተጠቅመዋል"
   }
 }

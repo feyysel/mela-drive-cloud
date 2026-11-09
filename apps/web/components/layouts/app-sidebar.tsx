@@ -1,0 +1,121 @@
+"use client"
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar"
+import { useMeQuery } from "@/features/user/api"
+import { useIsMobile } from "@/hooks/use-mobile"
+import CloudOutlineIcon from "@iconify-react/solar/cloud-outline"
+import Folder2OutlineIcon from "@iconify-react/solar/folder-2-outline"
+import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outline"
+import { filesize } from "filesize"
+import { useTranslations } from "next-intl"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { ComponentType } from "react"
+import { Progress } from "../ui/progress"
+import { Skeleton } from "../ui/skeleton"
+
+type NavLink = {
+  title: string
+  url: string
+  icon: ComponentType
+}
+
+export function AppSidebar() {
+  const pathname = usePathname()
+  const t = useTranslations()
+  const { data, isLoading } = useMeQuery()
+  const { toggleSidebar } = useSidebar()
+  const isMobile = useIsMobile()
+
+  const navLinks: NavLink[] = [
+    {
+      title: t("navigation.myDrive"),
+      url: "/drive",
+      icon: Folder2OutlineIcon,
+    },
+    {
+      title: t("navigation.trash"),
+      url: "/trash",
+      icon: TrashBinTrashOutlineIcon,
+    },
+  ]
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="min-h-16 bg-background">
+        <SidebarMenu className="my-auto">
+          <SidebarMenuItem>
+            <h1 className="ml-2 text-lg font-medium whitespace-nowrap">
+              {t("site.name")}
+            </h1>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent className="bg-background">
+        <SidebarGroup>
+          <SidebarMenu>
+            {navLinks.map((navLink) => (
+              <SidebarMenuItem key={navLink.title}>
+                <SidebarMenuButton
+                  isActive={
+                    pathname === navLink.url ||
+                    pathname.startsWith(`${navLink.url}/`)
+                  }
+                  render={
+                    <Link
+                      href={navLink.url}
+                      onClick={isMobile ? toggleSidebar : undefined}
+                    />
+                  }
+                >
+                  <navLink.icon />
+                  <span className="text-sm">{navLink.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="bg-background">
+        {isLoading ? (
+          <div className="space-y-2 p-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-5 rounded-full" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+            <Skeleton className="h-2" />
+            <Skeleton className="h-5 w-50" />
+          </div>
+        ) : data ? (
+          <div className="space-y-2 p-2 text-sm">
+            <div className="flex items-center gap-2">
+              <CloudOutlineIcon className="size-5" />
+              <span>{t("navigation.storage")}</span>
+            </div>
+
+            <Progress value={50} />
+
+            <p className="text-muted-foreground">
+              {t("navigation.storageUsed", {
+                used: filesize(data.storageUsedBytes),
+                quota: filesize(data.storageQuotaBytes),
+              })}
+            </p>
+          </div>
+        ) : null}
+      </SidebarFooter>
+    </Sidebar>
+  )
+}

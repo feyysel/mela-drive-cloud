@@ -57,5 +57,11 @@
       "alreadyHaveAccount": "Already have an account?",
       "login": "Log in"
     }
+  },
+  "navigation": {
+    "myDrive": "My Drive",
+    "trash": "Trash",
+    "storage": "Storage",
+    "storageUsed": "{used} of {quota} used"
   }
 }
