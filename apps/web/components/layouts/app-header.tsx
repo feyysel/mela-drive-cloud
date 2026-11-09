@@ -1,6 +1,7 @@
 "use client"
 
 import { HamburgerIcon } from "lucide-react"
+import { LocaleSwitcher } from "../locale-switcher"
 import { Button } from "../ui/button"
 import { useSidebar } from "../ui/sidebar"
 import { Header } from "./header"
@@ -18,6 +19,8 @@ export function AppHeader() {
       >
         <HamburgerIcon className="size-6" />
       </Button>
+
+      <LocaleSwitcher />
     </Header>
   )
 }
