@@ -17,6 +17,7 @@ import FolderOpenOutlineIcon from "@iconify-react/solar/folder-open-outline"
 import { LayoutGridIcon, ListIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { parseAsStringLiteral, useQueryState } from "nuqs"
+import { AddButton } from "../components/add-button"
 
 const views = ["grid", "list"] as const
 type DriveView = (typeof views)[number]
@@ -33,7 +34,7 @@ export function Drive() {
     useListFilesQuery(undefined)
 
   return (
-    <section className="flex flex-1 flex-col p-5">
+    <section className="flex flex-1 flex-col gap-5 p-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-medium">{t("navigation.myDrive")}</h1>
 
@@ -101,6 +102,8 @@ export function Drive() {
           </EmptyHeader>
         </Empty>
       )}
+
+      <AddButton />
     </section>
   )
 }

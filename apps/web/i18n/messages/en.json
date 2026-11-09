@@ -6,6 +6,7 @@
   },
   "common": {
     "save": "Save",
+    "create": "Create",
     "cancel": "Cancel",
     "eg": "e.g."
   },
@@ -65,9 +66,26 @@
     "storageUsed": "{used} of {quota} used"
   },
   "drive": {
+    "add": "New",
+    "newFolder": "New folder",
+    "uploadFile": "File upload",
+    "createFolder": {
+      "title": "New Folder",
+      "placeholder": "Folder name"
+    },
+    "upload": {
+      "title": "File upload",
+      "tooLarge": "File is too large. Max size is 100 MB.",
+      "rejected": "This file can't be uploaded."
+    },
     "empty": {
       "title": "Nothing here yet",
-      "description": "Upload a file or create a folder."
+      "description": "Upload a file or create a folder using the plus button."
     }
+  },
+  "dropzone": {
+    "title": "Drag and drop files here",
+    "description": "Documents, images, videos and more",
+    "cta": "Browse files"
   }
 }

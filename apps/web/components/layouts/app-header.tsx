@@ -1,6 +1,6 @@
 "use client"
 
-import { HamburgerIcon } from "lucide-react"
+import { MenuIcon } from "lucide-react"
 import { LocaleSwitcher } from "../locale-switcher"
 import { Button } from "../ui/button"
 import { useSidebar } from "../ui/sidebar"
@@ -17,7 +17,7 @@ export function AppHeader() {
         aria-label="open menu"
         onClick={toggleSidebar}
       >
-        <HamburgerIcon className="size-6" />
+        <MenuIcon />
       </Button>
 
       <LocaleSwitcher />

@@ -6,6 +6,7 @@
   },
   "common": {
     "save": "አስቀምጥ",
+    "create": "ፍጠር",
     "cancel": "ሰርዝ",
     "eg": "ለምሳሌ፦"
   },
@@ -65,9 +66,26 @@
     "storageUsed": "ከ {quota} {used} ተጠቅመዋል"
   },
   "drive": {
+    "add": "አዲስ",
+    "newFolder": "አዲስ አቃፊ",
+    "uploadFile": "ፋይል መጫን",
+    "createFolder": {
+      "title": "አዲስ አቃፊ",
+      "placeholder": "የአቃፊ ስም"
+    },
+    "upload": {
+      "title": "ፋይል መጫን",
+      "tooLarge": "ፋይሉ በጣም ትልቅ ነው። ከፍተኛው መጠን 100 ሜባ ነው።",
+      "rejected": "ይህ ፋይል መጫን አይቻልም።"
+    },
     "empty": {
       "title": "እስካሁን ምንም የለም",
-      "description": "ፋይል ይስቀሉ ወይም አቃፊ ይፍጠሩ።"
+      "description": "የመደመር አዝራሩን በመጠቀም ፋይል ይስቀሉ ወይም አቃፊ ይፍጠሩ።"
     }
+  },
+  "dropzone": {
+    "title": "ፋይሎችን እዚህ ጎትተው ይልቀቁ",
+    "description": "ሰነዶች፣ ምስሎች፣ ቪዲዮዎች እና ሌሎችም",
+    "cta": "ፋይል ይምረጡ"
   }
 }
