@@ -63,5 +63,11 @@
     "trash": "Trash",
     "storage": "Storage",
     "storageUsed": "{used} of {quota} used"
+  },
+  "drive": {
+    "empty": {
+      "title": "Nothing here yet",
+      "description": "Upload a file or create a folder."
+    }
   }
 }

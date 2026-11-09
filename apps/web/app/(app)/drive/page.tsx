@@ -1,3 +1,5 @@
+import { Drive } from "@/features/drive/pages/drive"
+
 export default function Page() {
-  return null
+  return <Drive />
 }

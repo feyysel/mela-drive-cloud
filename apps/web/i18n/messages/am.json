@@ -1,6 +1,6 @@
 {
   "site": {
-    "name": "Mela Drive",
+    "name": "መላ ድራይቭ",
     "tagline": "ፋይሎችዎ። በደህንነት የተደራጁ።",
     "description": "Mela Drive ፋይሎችን በደህንነት ለማከማቸት፣ ለማደራጀት፣ ቅድመ እይታ ለማየት እና ለማጋራት የሚያስችል የፋይል አስተዳደር መድረክ ነው።"
   },
@@ -63,5 +63,11 @@
     "trash": "መጣያ",
     "storage": "ማከማቻ",
     "storageUsed": "ከ {quota} {used} ተጠቅመዋል"
+  },
+  "drive": {
+    "empty": {
+      "title": "እስካሁን ምንም የለም",
+      "description": "ፋይል ይስቀሉ ወይም አቃፊ ይፍጠሩ።"
+    }
   }
 }
