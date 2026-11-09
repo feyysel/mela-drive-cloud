@@ -105,7 +105,9 @@ export function AppSidebar() {
               <span>{t("navigation.storage")}</span>
             </div>
 
-            <Progress value={50} />
+            <Progress
+              value={(data.storageUsedBytes / data.storageQuotaBytes) * 100}
+            />
 
             <p className="text-muted-foreground">
               {t("navigation.storageUsed", {
