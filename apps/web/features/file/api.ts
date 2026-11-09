@@ -10,12 +10,14 @@ export const fileApi = api.injectEndpoints({
   endpoints: (build) => ({
     getFile: build.query<DriveFile, string>({
       query: (fileId) => `/files/${fileId}`,
+      providesTags: (_result, _error, fileId) => [{ type: "File", id: fileId }],
     }),
     listFiles: build.query<DriveFile[], string | undefined>({
       query: (folderId) => ({
         url: "/files",
         params: { folderId },
       }),
+      providesTags: [{ type: "File", id: "LIST" }],
     }),
     uploadFile: build.mutation<DriveFile, UploadFileRequest>({
       query: ({ folderId, file }) => {
@@ -31,6 +33,7 @@ export const fileApi = api.injectEndpoints({
           body,
         }
       },
+      invalidatesTags: [{ type: "File", id: "LIST" }],
     }),
     renameFile: build.mutation<
       DriveFile,
@@ -41,6 +44,10 @@ export const fileApi = api.injectEndpoints({
         method: "PATCH",
         body,
       }),
+      invalidatesTags: (_result, _error, { fileId }) => [
+        { type: "File", id: fileId },
+        { type: "File", id: "LIST" },
+      ],
     }),
     moveFile: build.mutation<DriveFile, { fileId: string } & MoveFileRequest>({
       query: ({ fileId, ...body }) => ({
@@ -48,6 +55,10 @@ export const fileApi = api.injectEndpoints({
         method: "PATCH",
         body,
       }),
+      invalidatesTags: (_result, _error, { fileId }) => [
+        { type: "File", id: fileId },
+        { type: "File", id: "LIST" },
+      ],
     }),
   }),
 })
