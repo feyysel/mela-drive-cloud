@@ -5,8 +5,9 @@ import { Toaster } from "@/components/ui/toast"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { StoreProvider } from "@/store/provider"
+import { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
-import { getLocale } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { NuqsAdapter } from "nuqs/adapters/react"
 import "./globals.css"
 
@@ -21,6 +22,15 @@ const fontEthiopic = Noto_Sans_Ethiopic({
   subsets: ["ethiopic"],
   variable: "--font-ethiopic",
 })
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("site")
+
+  return {
+    title: t("name"),
+    description: t("description"),
+  }
+}
 
 export default async function RootLayout({
   children,
