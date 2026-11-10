@@ -34,6 +34,7 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { AudioPlayerDialog } from "./audio-player-dialog"
 import { FileDetailsDialog } from "./file-details-dialog"
+import { ImageViewerDialog } from "./image-viewer-dialog"
 import { VideoPlayerDialog } from "./video-player-dialog"
 
 function resolveMimeType({
@@ -65,11 +66,13 @@ export function File({
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
   const mimeType = resolveMimeType(file)
   const isVideo = mimeType.startsWith("video/")
   const isAudio = mimeType.startsWith("audio/")
-  const isPlayable = isVideo || isAudio
+  const isImage = mimeType.startsWith("image/")
+  const isPreviewable = isVideo || isAudio || isImage
   const Icon = getIcon(mimeType)
 
   return (
@@ -82,7 +85,7 @@ export function File({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
-        onClick={isPlayable ? () => setIsPlayerOpen(true) : undefined}
+        onClick={isPreviewable ? () => setIsPreviewOpen(true) : undefined}
       >
         <AttachmentMedia className="bg-transparent">
           <Icon className="size-6" />
@@ -147,15 +150,22 @@ export function File({
 
       {isVideo && (
         <VideoPlayerDialog
-          open={isPlayerOpen}
-          onOpenChange={setIsPlayerOpen}
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
           file={file}
         />
       )}
       {isAudio && (
         <AudioPlayerDialog
-          open={isPlayerOpen}
-          onOpenChange={setIsPlayerOpen}
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          file={file}
+        />
+      )}
+      {isImage && (
+        <ImageViewerDialog
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
           file={file}
         />
       )}
