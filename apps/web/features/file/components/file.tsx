@@ -29,14 +29,20 @@ import VideocameraRecordBoldIcon from "@iconify-react/solar/videocamera-record-b
 import { cn } from "cn"
 import { filesize } from "filesize"
 import { MoreVerticalIcon } from "lucide-react"
+import { lookup } from "mime-types"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { FileDetailsDialog } from "./file-details-dialog"
 
-function getIcon(mimeType: string) {
-  if (mimeType.startsWith("image/")) return GalleryBoldIcon
-  if (mimeType.startsWith("video/")) return VideocameraRecordBoldIcon
-  if (mimeType.startsWith("audio/")) return MusicNoteBoldIcon
+function getIcon({ name, mimeType }: Pick<DriveFile, "name" | "mimeType">) {
+  const type =
+    mimeType && mimeType !== "application/octet-stream"
+      ? mimeType
+      : lookup(name) || mimeType
+
+  if (type.startsWith("image/")) return GalleryBoldIcon
+  if (type.startsWith("video/")) return VideocameraRecordBoldIcon
+  if (type.startsWith("audio/")) return MusicNoteBoldIcon
   return FileTextBoldIcon
 }
 
@@ -53,7 +59,7 @@ export function File({
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const Icon = getIcon(file.mimeType)
+  const Icon = getIcon(file)
 
   return (
     <>
