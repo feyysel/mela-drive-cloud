@@ -35,6 +35,7 @@ import { useState } from "react"
 import { AudioPlayerDialog } from "./audio-player-dialog"
 import { FileDetailsDialog } from "./file-details-dialog"
 import { ImageViewerDialog } from "./image-viewer-dialog"
+import { PdfViewerDialog } from "./pdf-viewer-dialog"
 import { VideoPlayerDialog } from "./video-player-dialog"
 
 function resolveMimeType({
@@ -72,7 +73,8 @@ export function File({
   const isVideo = mimeType.startsWith("video/")
   const isAudio = mimeType.startsWith("audio/")
   const isImage = mimeType.startsWith("image/")
-  const isPreviewable = isVideo || isAudio || isImage
+  const isPdf = mimeType === "application/pdf"
+  const isPreviewable = isVideo || isAudio || isImage || isPdf
   const Icon = getIcon(mimeType)
 
   return (
@@ -164,6 +166,13 @@ export function File({
       )}
       {isImage && (
         <ImageViewerDialog
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          file={file}
+        />
+      )}
+      {isPdf && (
+        <PdfViewerDialog
           open={isPreviewOpen}
           onOpenChange={setIsPreviewOpen}
           file={file}
