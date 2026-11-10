@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import FolderOpenBoldIcon from "@iconify-react/solar/folder-open-bold"
+import InfoCircleOutlineIcon from "@iconify-react/solar/info-circle-outline"
 import MoveToFolderOutlineIcon from "@iconify-react/solar/move-to-folder-outline"
 import PenNewSquareOutlineIcon from "@iconify-react/solar/pen-new-square-outline"
 import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outline"
@@ -23,6 +24,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Folder as FolderType } from "../types"
+import { FolderDetailsDialog } from "./folder-details-dialog"
 import { MoveFolderDialog } from "./move-folder-dialog"
 import { RenameFolderDialog } from "./rename-folder-dialog"
 
@@ -39,6 +41,7 @@ export function Folder({
   const t = useTranslations()
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   return (
     <>
@@ -71,6 +74,11 @@ export function Folder({
               <MoreVerticalIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
+                <InfoCircleOutlineIcon />
+                {t("common.details")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
                 <PenNewSquareOutlineIcon />
                 {t("common.rename")}
@@ -89,6 +97,11 @@ export function Folder({
         </AttachmentActions>
       </Attachment>
 
+      <FolderDetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        folder={folder}
+      />
       <RenameFolderDialog
         open={isRenameOpen}
         onOpenChange={setIsRenameOpen}

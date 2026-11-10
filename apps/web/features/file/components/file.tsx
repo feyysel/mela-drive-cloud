@@ -1,3 +1,4 @@
+import InfoCircleOutlineIcon from "@iconify-react/solar/info-circle-outline"
 import { DriveFile } from "../types"
 import { MoveFileDialog } from "./move-file-dialog"
 import { RenameFileDialog } from "./rename-file-dialog"
@@ -30,6 +31,7 @@ import { filesize } from "filesize"
 import { MoreVerticalIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
+import { FileDetailsDialog } from "./file-details-dialog"
 
 function getIcon(mimeType: string) {
   if (mimeType.startsWith("image/")) return GalleryBoldIcon
@@ -50,6 +52,7 @@ export function File({
   const t = useTranslations()
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const Icon = getIcon(file.mimeType)
 
   return (
@@ -85,6 +88,11 @@ export function File({
               <MoreVerticalIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
+                <InfoCircleOutlineIcon />
+                {t("common.details")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
                 <PenNewSquareOutlineIcon />
                 {t("common.rename")}
@@ -103,6 +111,11 @@ export function File({
         </AttachmentActions>
       </Attachment>
 
+      <FileDetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        file={file}
+      />
       <RenameFileDialog
         open={isRenameOpen}
         onOpenChange={setIsRenameOpen}

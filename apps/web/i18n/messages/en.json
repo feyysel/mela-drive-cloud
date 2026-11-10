@@ -12,7 +12,8 @@
     "move": "Move",
     "trash": "Move to trash",
     "moreActions": "More actions",
-    "eg": "e.g."
+    "eg": "e.g.",
+    "details": "Details"
   },
   "errors": {
     "unexpected": "An unexpected error occurred",
@@ -86,6 +87,13 @@
     "empty": {
       "title": "Nothing here yet",
       "description": "Upload a file or create a folder using the plus button."
+    },
+    "details": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "created": "Created",
+      "modified": "Modified"
     }
   },
   "dropzone": {

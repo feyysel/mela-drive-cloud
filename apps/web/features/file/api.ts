@@ -33,7 +33,7 @@ export const fileApi = api.injectEndpoints({
           body,
         }
       },
-      invalidatesTags: [{ type: "File", id: "LIST" }],
+      invalidatesTags: [{ type: "File", id: "LIST" }, "User"],
     }),
     renameFile: build.mutation<
       DriveFile,
