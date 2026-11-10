@@ -23,6 +23,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Folder as FolderType } from "../types"
+import { MoveFolderDialog } from "./move-folder-dialog"
 import { RenameFolderDialog } from "./rename-folder-dialog"
 
 export function Folder({
@@ -37,6 +38,7 @@ export function Folder({
   const router = useRouter()
   const t = useTranslations()
   const [isRenameOpen, setIsRenameOpen] = useState(false)
+  const [isMoveOpen, setIsMoveOpen] = useState(false)
 
   return (
     <>
@@ -73,7 +75,7 @@ export function Folder({
                 <PenNewSquareOutlineIcon />
                 {t("common.rename")}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
                 <MoveToFolderOutlineIcon />
                 {t("common.move")}
               </DropdownMenuItem>
@@ -90,6 +92,11 @@ export function Folder({
       <RenameFolderDialog
         open={isRenameOpen}
         onOpenChange={setIsRenameOpen}
+        folder={folder}
+      />
+      <MoveFolderDialog
+        open={isMoveOpen}
+        onOpenChange={setIsMoveOpen}
         folder={folder}
       />
     </>
