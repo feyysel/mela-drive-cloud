@@ -77,6 +77,7 @@
       "title": "አዲስ አቃፊ",
       "placeholder": "የአቃፊ ስም"
     },
+    "file": { "placeholder": "የፋይል ስም" },
     "upload": {
       "title": "ፋይል መጫን",
       "tooLarge": "ፋይሉ በጣም ትልቅ ነው። ከፍተኛው መጠን 100 ሜባ ነው።",
