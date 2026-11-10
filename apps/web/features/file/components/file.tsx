@@ -33,13 +33,18 @@ import { lookup } from "mime-types"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { FileDetailsDialog } from "./file-details-dialog"
+import { VideoPlayerDialog } from "./video-player-dialog"
 
-function getIcon({ name, mimeType }: Pick<DriveFile, "name" | "mimeType">) {
-  const type =
-    mimeType && mimeType !== "application/octet-stream"
-      ? mimeType
-      : lookup(name) || mimeType
+function resolveMimeType({
+  name,
+  mimeType,
+}: Pick<DriveFile, "name" | "mimeType">) {
+  return mimeType && mimeType !== "application/octet-stream"
+    ? mimeType
+    : lookup(name) || mimeType
+}
 
+function getIcon(type: string) {
   if (type.startsWith("image/")) return GalleryBoldIcon
   if (type.startsWith("video/")) return VideocameraRecordBoldIcon
   if (type.startsWith("audio/")) return MusicNoteBoldIcon
@@ -59,7 +64,10 @@ export function File({
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const Icon = getIcon(file)
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false)
+  const mimeType = resolveMimeType(file)
+  const isVideo = mimeType.startsWith("video/")
+  const Icon = getIcon(mimeType)
 
   return (
     <>
@@ -71,6 +79,7 @@ export function File({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
+        onClick={isVideo ? () => setIsPlayerOpen(true) : undefined}
       >
         <AttachmentMedia className="bg-transparent">
           <Icon className="size-6" />
@@ -132,6 +141,14 @@ export function File({
         onOpenChange={setIsMoveOpen}
         file={file}
       />
+
+      {isVideo && (
+        <VideoPlayerDialog
+          open={isPlayerOpen}
+          onOpenChange={setIsPlayerOpen}
+          file={file}
+        />
+      )}
     </>
   )
 }
