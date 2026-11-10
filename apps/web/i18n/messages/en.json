@@ -13,7 +13,8 @@
     "trash": "Move to trash",
     "moreActions": "More actions",
     "eg": "e.g.",
-    "details": "Details"
+    "details": "Details",
+    "logout": "Logout"
   },
   "errors": {
     "unexpected": "An unexpected error occurred",

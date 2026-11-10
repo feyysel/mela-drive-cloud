@@ -13,7 +13,8 @@
     "trash": "ወደ ቆሻሻ ውሰድ",
     "moreActions": "ተጨማሪ እርምጃዎች",
     "eg": "ለምሳሌ፦",
-    "details": "ዝርዝር"
+    "details": "ዝርዝር",
+    "logout": "ውጣ"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",

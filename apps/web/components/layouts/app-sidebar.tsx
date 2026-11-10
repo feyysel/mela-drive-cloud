@@ -137,7 +137,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout}>
               {isLoggingOut ? <Spinner /> : <LogOutIcon />}
-              <span>Logout</span>
+              <span>{t("common.logout")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
