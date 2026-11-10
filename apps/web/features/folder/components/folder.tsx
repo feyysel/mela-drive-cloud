@@ -20,6 +20,7 @@ import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outli
 import { cn } from "cn"
 import { MoreVerticalIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Folder as FolderType } from "../types"
 import { RenameFolderDialog } from "./rename-folder-dialog"
@@ -33,6 +34,7 @@ export function Folder({
   index: number
   view: "list" | "grid"
 }) {
+  const router = useRouter()
   const t = useTranslations()
   const [isRenameOpen, setIsRenameOpen] = useState(false)
 
@@ -46,6 +48,7 @@ export function Folder({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
+        onClick={() => router.push(`/drive/folders/${folder.id}`)}
       >
         <AttachmentMedia className="bg-transparent">
           <FolderOpenBoldIcon className="size-6" />
@@ -53,7 +56,7 @@ export function Folder({
         <AttachmentContent>
           <AttachmentTitle>{folder.name}</AttachmentTitle>
         </AttachmentContent>
-        <AttachmentActions>
+        <AttachmentActions onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
