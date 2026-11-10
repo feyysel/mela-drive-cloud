@@ -32,6 +32,7 @@ import { MoreVerticalIcon } from "lucide-react"
 import { lookup } from "mime-types"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
+import { AudioPlayerDialog } from "./audio-player-dialog"
 import { FileDetailsDialog } from "./file-details-dialog"
 import { VideoPlayerDialog } from "./video-player-dialog"
 
@@ -67,6 +68,8 @@ export function File({
   const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const mimeType = resolveMimeType(file)
   const isVideo = mimeType.startsWith("video/")
+  const isAudio = mimeType.startsWith("audio/")
+  const isPlayable = isVideo || isAudio
   const Icon = getIcon(mimeType)
 
   return (
@@ -79,7 +82,7 @@ export function File({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
-        onClick={isVideo ? () => setIsPlayerOpen(true) : undefined}
+        onClick={isPlayable ? () => setIsPlayerOpen(true) : undefined}
       >
         <AttachmentMedia className="bg-transparent">
           <Icon className="size-6" />
@@ -144,6 +147,13 @@ export function File({
 
       {isVideo && (
         <VideoPlayerDialog
+          open={isPlayerOpen}
+          onOpenChange={setIsPlayerOpen}
+          file={file}
+        />
+      )}
+      {isAudio && (
+        <AudioPlayerDialog
           open={isPlayerOpen}
           onOpenChange={setIsPlayerOpen}
           file={file}
