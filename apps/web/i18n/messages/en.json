@@ -8,6 +8,10 @@
     "save": "Save",
     "create": "Create",
     "cancel": "Cancel",
+    "rename": "Rename",
+    "move": "Move",
+    "trash": "Move to trash",
+    "moreActions": "More actions",
     "eg": "e.g."
   },
   "errors": {
