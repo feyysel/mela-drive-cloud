@@ -11,18 +11,23 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useLogoutMutation } from "@/features/auth/api"
 import { useMeQuery } from "@/features/user/api"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { parseErr } from "@/store/utils"
 import CloudOutlineIcon from "@iconify-react/solar/cloud-outline"
 import Folder2OutlineIcon from "@iconify-react/solar/folder-2-outline"
 import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outline"
 import { filesize } from "filesize"
+import { LogOutIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ComponentType } from "react"
 import { Progress } from "../ui/progress"
 import { Skeleton } from "../ui/skeleton"
+import { Spinner } from "../ui/spinner"
+import { toast } from "../ui/toast"
 
 type NavLink = {
   title: string
@@ -31,11 +36,13 @@ type NavLink = {
 }
 
 export function AppSidebar() {
+  const router = useRouter()
   const pathname = usePathname()
   const t = useTranslations()
   const { data, isLoading } = useMeQuery()
   const { toggleSidebar } = useSidebar()
   const isMobile = useIsMobile()
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation()
 
   const navLinks: NavLink[] = [
     {
@@ -49,6 +56,15 @@ export function AppSidebar() {
       icon: TrashBinTrashOutlineIcon,
     },
   ]
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap()
+      router.replace("/login")
+    } catch (error: unknown) {
+      toast.add({ type: "error", title: parseErr(error).message })
+    }
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -100,7 +116,7 @@ export function AppSidebar() {
           </div>
         ) : data ? (
           <div className="space-y-2 p-2 text-sm">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <CloudOutlineIcon className="size-5" />
               <span>{t("navigation.storage")}</span>
             </div>
@@ -117,6 +133,14 @@ export function AppSidebar() {
             </p>
           </div>
         ) : null}
+        <SidebarMenu className="pb-3">
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout}>
+              {isLoggingOut ? <Spinner /> : <LogOutIcon />}
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   )
