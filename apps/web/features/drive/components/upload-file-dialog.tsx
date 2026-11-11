@@ -5,7 +5,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Spinner } from "@/components/ui/spinner"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { toast } from "@/components/ui/toast"
 import { useUploadFileMutation } from "@/features/file/api"
 import { parseErr } from "@/store/utils"
@@ -56,9 +61,14 @@ export function UploadFileDialog({
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex min-h-80 items-center justify-center">
-            <Spinner className="size-6" />
-          </div>
+          <Empty className="min-h-80">
+            <EmptyHeader>
+              <EmptyTitle className="shimmer text-muted-foreground shimmer-duration-1300 shimmer-spread-5">
+                Upload file
+              </EmptyTitle>
+              <EmptyDescription>Please wait</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <Dropzone
             multiple={false}
