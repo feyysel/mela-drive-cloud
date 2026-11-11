@@ -64,7 +64,7 @@ export function UploadFileDialog({
           <Empty className="min-h-80">
             <EmptyHeader>
               <EmptyTitle className="shimmer text-muted-foreground shimmer-duration-1300 shimmer-spread-5">
-                Upload file
+                Uploading file
               </EmptyTitle>
               <EmptyDescription>Please wait</EmptyDescription>
             </EmptyHeader>
