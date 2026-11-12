@@ -99,7 +99,7 @@ export function Folders({ folderId }: { folderId: string }) {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
               {folders.map((folder, index) => (
                 <Folder
                   key={folder.id}
