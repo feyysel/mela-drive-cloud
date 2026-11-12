@@ -222,18 +222,3 @@ func (h *Handler) Purge(ctx *gin.Context) {
 
 	res.NoContent(ctx)
 }
-
-func (h *Handler) EmptyTrash(ctx *gin.Context) {
-	ownerID, err := ginx.UserID(ctx)
-	if err != nil {
-		res.Error(ctx, err)
-		return
-	}
-
-	if err := h.svc.EmptyTrash(ctx, ownerID); err != nil {
-		res.Error(ctx, err)
-		return
-	}
-
-	res.NoContent(ctx)
-}

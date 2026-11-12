@@ -16,6 +16,7 @@ import (
 	"github.com/feyysel/mela-drive-cloud/internal/ratelimit"
 	"github.com/feyysel/mela-drive-cloud/internal/session"
 	"github.com/feyysel/mela-drive-cloud/internal/storage"
+	"github.com/feyysel/mela-drive-cloud/internal/trash"
 	"github.com/feyysel/mela-drive-cloud/internal/user"
 	"github.com/redis/go-redis/v9"
 	"github.com/resend/resend-go/v4"
@@ -31,6 +32,7 @@ type Container struct {
 	UserHandler         *user.Handler
 	FolderHandler       *folder.Handler
 	FileHandler         *file.Handler
+	TrashHandler        *trash.Handler
 	AuthHandler         *auth.Handler
 }
 
@@ -67,6 +69,7 @@ func New(cfg config.Config) (*Container, error) {
 	storageSvc := storage.NewService(cfg.Storage)
 	folderSvc := folder.NewService(folder.NewRepository(pool), userSvc, storageSvc)
 	fileSvc := file.NewService(file.NewRepository(pool), userSvc, folderSvc, storageSvc)
+	trashSvc := trash.NewService(folderSvc, fileSvc)
 
 	ok = true
 
@@ -80,6 +83,7 @@ func New(cfg config.Config) (*Container, error) {
 		UserHandler:         user.NewHandler(userSvc),
 		FolderHandler:       folder.NewHandler(folderSvc),
 		FileHandler:         file.NewHandler(fileSvc),
+		TrashHandler:        trash.NewHandler(trashSvc),
 		AuthHandler:         auth.NewHandler(authSvc, cfg.Session),
 	}, nil
 }

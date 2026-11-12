@@ -1,8 +1,14 @@
-"use client";
+"use client"
 
-import { mergeProps } from "@base-ui/react/merge-props";
-import { Slider as SliderPrimitive } from "@base-ui/react/slider";
-import { useRender } from "@base-ui/react/use-render";
+import { mergeProps } from "@base-ui/react/merge-props"
+import { Slider as SliderPrimitive } from "@base-ui/react/slider"
+import { useRender } from "@base-ui/react/use-render"
+import type {
+  ComponentProps,
+  CSSProperties,
+  KeyboardEvent,
+  ReactNode,
+} from "react"
 import {
   createContext,
   useContext,
@@ -10,54 +16,49 @@ import {
   useEffectEvent,
   useMemo,
   useState,
-} from "react";
-import type {
-  ComponentProps,
-  CSSProperties,
-  KeyboardEvent,
-  ReactNode,
-} from "react";
+} from "react"
 
+import type { VolumeControlProps } from "@/components/ui/volume-control"
 import {
   VolumeControl,
   VolumeControlMute,
   VolumeControlSlider,
-} from "@/components/ui/volume-control";
-import type { VolumeControlProps } from "@/components/ui/volume-control";
-import { useAudioPlayer } from "@/hooks/use-audio-player";
+} from "@/components/ui/volume-control"
 import type {
   AudioPlayerController,
   UseAudioPlayerOptions,
-} from "@/hooks/use-audio-player";
-import { useFrameSource } from "@/hooks/use-frame-source";
-import { clamp } from "@/lib/audio/decibels";
-import { formatTime } from "@/lib/audio/time";
-import { cn } from "@/lib/utils";
+} from "@/hooks/use-audio-player"
+import { useAudioPlayer } from "@/hooks/use-audio-player"
+import { useFrameSource } from "@/hooks/use-frame-source"
+import { clamp } from "@/lib/audio/decibels"
+import { formatTime } from "@/lib/audio/time"
+import { cn } from "@/lib/utils"
+import Image from "next/image"
 
-const DEFAULT_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
-const SEEK_STEP = 5;
-const SEEK_LARGE_STEP = 15;
-const VOLUME_STEP = 0.05;
+const DEFAULT_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2]
+const SEEK_STEP = 5
+const SEEK_LARGE_STEP = 15
+const VOLUME_STEP = 0.05
 
 interface AudioPlayerContextValue {
-  player: AudioPlayerController;
-  onPrevious?: () => void;
-  onNext?: () => void;
+  player: AudioPlayerController
+  onPrevious?: () => void
+  onNext?: () => void
 }
 
-const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
+const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null)
 
 const useAudioPlayerPart = (part: string) => {
-  const context = useContext(AudioPlayerContext);
+  const context = useContext(AudioPlayerContext)
   if (!context) {
-    throw new Error(`${part} must be used inside AudioPlayer.`);
+    throw new Error(`${part} must be used inside AudioPlayer.`)
   }
-  return context;
-};
+  return context
+}
 
 /** The player controller of the surrounding `AudioPlayer`. */
 export const useAudioPlayerContext = (): AudioPlayerController =>
-  useAudioPlayerPart("useAudioPlayerContext").player;
+  useAudioPlayerPart("useAudioPlayerContext").player
 
 export interface AudioPlayerProps
   extends
@@ -67,54 +68,54 @@ export interface AudioPlayerProps
     >,
     Omit<UseAudioPlayerOptions, "onPlay" | "onPause" | "onEnded" | "onError"> {
   /** Use an existing player from `useAudioPlayer` instead of an internal one. */
-  player?: AudioPlayerController;
-  onPlay?: () => void;
-  onPause?: () => void;
-  onEnded?: () => void;
-  onError?: (error: MediaError | null) => void;
-  onTimeUpdate?: (time: number) => void;
+  player?: AudioPlayerController
+  onPlay?: () => void
+  onPause?: () => void
+  onEnded?: () => void
+  onError?: (error: MediaError | null) => void
+  onTimeUpdate?: (time: number) => void
   /** Enables the previous button. */
-  onPrevious?: () => void;
+  onPrevious?: () => void
   /** Enables the next button. */
-  onNext?: () => void;
+  onNext?: () => void
   /** Keyboard shortcuts while focus is inside. Default true. */
-  shortcuts?: boolean;
+  shortcuts?: boolean
 }
 
 const InternalPlayer = ({
   options,
   children,
 }: {
-  options: UseAudioPlayerOptions;
-  children: (player: AudioPlayerController) => ReactNode;
+  options: UseAudioPlayerOptions
+  children: (player: AudioPlayerController) => ReactNode
 }) => {
-  const player = useAudioPlayer(options);
-  return <>{children(player)}</>;
-};
+  const player = useAudioPlayer(options)
+  return <>{children(player)}</>
+}
 
 const isEditable = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
   (target.isContentEditable ||
-    ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName));
+    ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName))
 
 type ShortcutEvent = Pick<
   KeyboardEvent<HTMLElement>,
   "key" | "shiftKey" | "target"
->;
+>
 
 const inSliderTarget = (target: HTMLElement) =>
   target.getAttribute("type") === "range" ||
-  target.getAttribute("role") === "slider";
+  target.getAttribute("role") === "slider"
 
 /** The player action for a key, or null to let the key through. */
 const shortcutFor = (
   event: ShortcutEvent,
   player: AudioPlayerController
 ): (() => void) | null => {
-  const target = event.target as HTMLElement;
-  const seekAmount = event.shiftKey ? SEEK_LARGE_STEP : SEEK_STEP;
-  const togglesPlayback = !(target.tagName === "BUTTON" || isEditable(target));
-  const sliderKeys = !inSliderTarget(target);
+  const target = event.target as HTMLElement
+  const seekAmount = event.shiftKey ? SEEK_LARGE_STEP : SEEK_STEP
+  const togglesPlayback = !(target.tagName === "BUTTON" || isEditable(target))
+  const sliderKeys = !inSliderTarget(target)
   const actions: Record<string, (() => void) | null> = {
     " ": togglesPlayback ? () => player.toggle() : null,
     ArrowDown: sliderKeys
@@ -133,9 +134,9 @@ const shortcutFor = (
     Home: () => player.seek(0),
     k: togglesPlayback ? () => player.toggle() : null,
     m: () => player.setMuted(!player.muted),
-  };
-  return actions[event.key] ?? null;
-};
+  }
+  return actions[event.key] ?? null
+}
 
 const PlayerRoot = ({
   player,
@@ -148,40 +149,40 @@ const PlayerRoot = ({
   onKeyDown,
   ...props
 }: Omit<AudioPlayerProps, keyof UseAudioPlayerOptions | "player"> & {
-  player: AudioPlayerController;
+  player: AudioPlayerController
 }) => {
-  const { currentTime } = player;
+  const { currentTime } = player
   const contextValue = useMemo<AudioPlayerContextValue>(
     () => ({ onNext, onPrevious, player }),
     [onNext, onPrevious, player]
-  );
+  )
 
   // Reports time changes, not every render of a parent with an inline
   // callback.
   const reportTime = useEffectEvent((time: number) => {
-    onTimeUpdate?.(time);
-  });
+    onTimeUpdate?.(time)
+  })
 
   useEffect(() => {
-    reportTime(currentTime);
-  }, [currentTime]);
+    reportTime(currentTime)
+  }, [currentTime])
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    onKeyDown?.(event);
+    onKeyDown?.(event)
     if (
       !shortcuts ||
       event.defaultPrevented ||
       event.metaKey ||
       event.ctrlKey
     ) {
-      return;
+      return
     }
-    const action = shortcutFor(event, player);
+    const action = shortcutFor(event, player)
     if (action) {
-      event.preventDefault();
-      action();
+      event.preventDefault()
+      action()
     }
-  };
+  }
 
   return (
     <AudioPlayerContext.Provider value={contextValue}>
@@ -204,8 +205,8 @@ const PlayerRoot = ({
         {children}
       </div>
     </AudioPlayerContext.Provider>
-  );
-};
+  )
+}
 
 export const AudioPlayer = ({
   player,
@@ -225,7 +226,7 @@ export const AudioPlayer = ({
   ...props
 }: AudioPlayerProps) => {
   if (player) {
-    return <PlayerRoot player={player} shortcuts={shortcuts} {...props} />;
+    return <PlayerRoot player={player} shortcuts={shortcuts} {...props} />
   }
   return (
     <InternalPlayer
@@ -248,24 +249,24 @@ export const AudioPlayer = ({
         <PlayerRoot player={internal} shortcuts={shortcuts} {...props} />
       )}
     </InternalPlayer>
-  );
-};
+  )
+}
 
 export const AudioPlayerArtwork = ({
   className,
   alt = "",
   ...props
-}: ComponentProps<"img">) => (
-  <img
+}: ComponentProps<typeof Image>) => (
+  <Image
     alt={alt}
     className={cn(
-      "bg-muted size-12 shrink-0 rounded-lg object-cover",
+      "size-12 shrink-0 rounded-lg bg-muted object-cover",
       className
     )}
     data-slot="audio-player-artwork"
     {...props}
   />
-);
+)
 
 export const AudioPlayerTitle = ({
   className,
@@ -276,18 +277,18 @@ export const AudioPlayerTitle = ({
     data-slot="audio-player-title"
     {...props}
   />
-);
+)
 
 export const AudioPlayerDescription = ({
   className,
   ...props
 }: ComponentProps<"span">) => (
   <span
-    className={cn("text-muted-foreground truncate text-xs", className)}
+    className={cn("truncate text-xs text-muted-foreground", className)}
     data-slot="audio-player-description"
     {...props}
   />
-);
+)
 
 export const AudioPlayerControls = ({
   className,
@@ -298,17 +299,17 @@ export const AudioPlayerControls = ({
     data-slot="audio-player-controls"
     {...props}
   />
-);
+)
 
 const buttonClass =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-full text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-40 [&_svg:not([class*='size-'])]:size-4";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-full text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-40 [&_svg:not([class*='size-'])]:size-4"
 
 type PlayerButtonProps = Omit<
   useRender.ComponentProps<"button">,
   "children"
 > & {
-  children?: ReactNode;
-};
+  children?: ReactNode
+}
 
 const usePlayerButton = (
   slot: string,
@@ -332,15 +333,14 @@ const usePlayerButton = (
     ),
     render,
     state: { slot, ...options.state },
-  });
+  })
 
 export interface AudioPlayerPlayProps extends Omit<
   useRender.ComponentProps<"button">,
   "children"
 > {
   children?:
-    | ReactNode
-    | ((state: { playing: boolean; loading: boolean }) => ReactNode);
+    ReactNode | ((state: { playing: boolean; loading: boolean }) => ReactNode)
 }
 
 export const AudioPlayerPlay = ({
@@ -348,22 +348,22 @@ export const AudioPlayerPlay = ({
   className,
   ...props
 }: AudioPlayerPlayProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerPlay");
-  const loading = player.status === "loading";
+  const { player } = useAudioPlayerPart("AudioPlayerPlay")
+  const loading = player.status === "loading"
   const content =
     typeof children === "function"
       ? children({ loading, playing: player.playing })
-      : children;
+      : children
   return usePlayerButton(
     "audio-player-play",
     player.playing ? "Pause" : "Play",
     () => {
-      player.toggle();
+      player.toggle()
     },
     {
       children: content,
       className: cn(
-        "bg-primary text-primary-foreground hover:bg-primary/85 size-10",
+        "size-10 bg-primary text-primary-foreground hover:bg-primary/85",
         className
       ),
       ...props,
@@ -372,11 +372,11 @@ export const AudioPlayerPlay = ({
       disabled: player.status === "idle" || player.status === "error",
       state: { loading, playing: player.playing },
     }
-  );
-};
+  )
+}
 
 export const AudioPlayerPrevious = (props: PlayerButtonProps) => {
-  const { onPrevious } = useAudioPlayerPart("AudioPlayerPrevious");
+  const { onPrevious } = useAudioPlayerPart("AudioPlayerPrevious")
   return usePlayerButton(
     "audio-player-previous",
     "Previous",
@@ -385,46 +385,46 @@ export const AudioPlayerPrevious = (props: PlayerButtonProps) => {
     {
       disabled: !onPrevious,
     }
-  );
-};
+  )
+}
 
 export const AudioPlayerNext = (props: PlayerButtonProps) => {
-  const { onNext } = useAudioPlayerPart("AudioPlayerNext");
+  const { onNext } = useAudioPlayerPart("AudioPlayerNext")
   return usePlayerButton("audio-player-next", "Next", () => onNext?.(), props, {
     disabled: !onNext,
-  });
-};
+  })
+}
 
 export interface AudioPlayerSkipProps extends PlayerButtonProps {
   /** Default 10. */
-  seconds?: number;
+  seconds?: number
 }
 
 export const AudioPlayerSkipBack = ({
   seconds = 10,
   ...props
 }: AudioPlayerSkipProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerSkipBack");
+  const { player } = useAudioPlayerPart("AudioPlayerSkipBack")
   return usePlayerButton(
     "audio-player-skip-back",
     `Back ${seconds} seconds`,
     () => player.seek(player.currentTime - seconds),
     props
-  );
-};
+  )
+}
 
 export const AudioPlayerSkipForward = ({
   seconds = 10,
   ...props
 }: AudioPlayerSkipProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerSkipForward");
+  const { player } = useAudioPlayerPart("AudioPlayerSkipForward")
   return usePlayerButton(
     "audio-player-skip-forward",
     `Forward ${seconds} seconds`,
     () => player.seek(player.currentTime + seconds),
     props
-  );
-};
+  )
+}
 
 export interface AudioPlayerSeekProps extends Omit<
   SliderPrimitive.Root.Props<number>,
@@ -437,9 +437,9 @@ export interface AudioPlayerSeekProps extends Omit<
   | "step"
 > {
   /** Seconds per arrow key. Default 5. */
-  step?: number;
+  step?: number
   /** Seconds per Shift+arrow. Default 15. */
-  largeStep?: number;
+  largeStep?: number
 }
 
 export const AudioPlayerSeek = ({
@@ -448,20 +448,20 @@ export const AudioPlayerSeek = ({
   className,
   ...props
 }: AudioPlayerSeekProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerSeek");
-  const [time, setTime] = useState(player.currentTime);
-  const [dragValue, setDragValue] = useState<number | null>(null);
-  const duration = player.duration || 0;
+  const { player } = useAudioPlayerPart("AudioPlayerSeek")
+  const [time, setTime] = useState(player.currentTime)
+  const [dragValue, setDragValue] = useState<number | null>(null)
+  const duration = player.duration || 0
 
   useFrameSource(player.time, (next) => {
     if (dragValue === null) {
-      setTime(next);
+      setTime(next)
     }
-  });
+  })
 
-  const value = dragValue ?? time;
+  const value = dragValue ?? time
   const bufferedPercent =
-    duration > 0 ? clamp(player.buffered / duration, 0, 1) * 100 : 0;
+    duration > 0 ? clamp(player.buffered / duration, 0, 1) * 100 : 0
 
   return (
     <SliderPrimitive.Root
@@ -476,9 +476,9 @@ export const AudioPlayerSeek = ({
       min={0}
       onValueChange={(next) => setDragValue(next)}
       onValueCommitted={(next) => {
-        player.seek(next);
-        setTime(next);
-        setDragValue(null);
+        player.seek(next)
+        setTime(next)
+        setDragValue(null)
       }}
       step={0.01}
       value={clamp(value, 0, Math.max(duration, 0.001))}
@@ -486,54 +486,54 @@ export const AudioPlayerSeek = ({
     >
       <SliderPrimitive.Control className="relative flex h-4 w-full items-center px-1.5 before:absolute before:inset-x-0 before:-inset-y-1.5 pointer-coarse:before:-inset-y-3">
         <SliderPrimitive.Track
-          className="bg-input/90 relative h-1 w-full grow rounded-full"
+          className="relative h-1 w-full grow rounded-full bg-input/90"
           data-slot="audio-player-seek-track"
         >
           <div
-            className="bg-muted-foreground/25 absolute inset-y-0 start-0 w-(--buffered) rounded-full"
+            className="absolute inset-y-0 inset-s-0 w-(--buffered) rounded-full bg-muted-foreground/25"
             data-slot="audio-player-seek-buffered"
             style={{ "--buffered": `${bufferedPercent}%` } as CSSProperties}
           />
           <SliderPrimitive.Indicator
-            className="bg-primary rounded-full"
+            className="rounded-full bg-primary"
             data-slot="audio-player-seek-range"
           />
           <SliderPrimitive.Thumb
             aria-label="Seek"
-            className="bg-background ring-foreground/15 hover:ring-ring/30 focus-visible:ring-ring/40 block size-3 shrink-0 rounded-full shadow-sm ring-1 outline-hidden transition-[box-shadow] hover:ring-4 focus-visible:ring-4"
+            className="block size-3 shrink-0 rounded-full bg-background shadow-sm ring-1 ring-foreground/15 outline-hidden transition-shadow hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/40"
             data-slot="audio-player-seek-thumb"
             getAriaValueText={() =>
               `${formatTime(value)} of ${formatTime(duration)}`
             }
             onKeyDown={(event) => {
-              const amount = event.shiftKey ? largeStep : step;
+              const amount = event.shiftKey ? largeStep : step
               if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-                event.preventDefault();
+                event.preventDefault()
                 player.seek(
                   value + (event.key === "ArrowRight" ? amount : -amount)
-                );
+                )
               }
             }}
           />
         </SliderPrimitive.Track>
       </SliderPrimitive.Control>
     </SliderPrimitive.Root>
-  );
-};
+  )
+}
 
 export interface AudioPlayerTimeProps extends ComponentProps<"span"> {
   /** Default `current`. */
-  type?: "current" | "remaining" | "duration";
+  type?: "current" | "remaining" | "duration"
   format?: (
     seconds: number,
     type: "current" | "remaining" | "duration"
-  ) => string;
+  ) => string
 }
 
 const defaultTimeFormat = (
   seconds: number,
   type: "current" | "remaining" | "duration"
-) => formatTime(seconds, { remaining: type === "remaining" });
+) => formatTime(seconds, { remaining: type === "remaining" })
 
 export const AudioPlayerTime = ({
   type = "current",
@@ -542,22 +542,22 @@ export const AudioPlayerTime = ({
   style,
   ...props
 }: AudioPlayerTimeProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerTime");
+  const { player } = useAudioPlayerPart("AudioPlayerTime")
   // As wide as the longest time this track can show, so it never shifts.
   const timeWidth = Math.max(
     format(0, type).length,
     format(player.duration, type).length
-  );
-  let seconds = player.currentTime;
+  )
+  let seconds = player.currentTime
   if (type === "duration") {
-    seconds = player.duration;
+    seconds = player.duration
   } else if (type === "remaining") {
-    seconds = Math.max(0, player.duration - player.currentTime);
+    seconds = Math.max(0, player.duration - player.currentTime)
   }
   return (
     <span
       className={cn(
-        "text-muted-foreground inline-block min-w-(--audio-player-time-width) text-end font-mono text-xs whitespace-nowrap tabular-nums",
+        "inline-block min-w-(--audio-player-time-width) text-end font-mono text-xs whitespace-nowrap text-muted-foreground tabular-nums",
         className
       )}
       data-slot="audio-player-time"
@@ -572,8 +572,8 @@ export const AudioPlayerTime = ({
     >
       {format(seconds, type)}
     </span>
-  );
-};
+  )
+}
 
 export type AudioPlayerVolumeProps = Omit<
   VolumeControlProps,
@@ -583,14 +583,14 @@ export type AudioPlayerVolumeProps = Omit<
   | "muted"
   | "defaultMuted"
   | "onMutedChange"
->;
+>
 
 export const AudioPlayerVolume = ({
   children,
   className,
   ...props
 }: AudioPlayerVolumeProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerVolume");
+  const { player } = useAudioPlayerPart("AudioPlayerVolume")
   return (
     <VolumeControl
       className={cn("w-32", className)}
@@ -608,11 +608,11 @@ export const AudioPlayerVolume = ({
         </>
       )}
     </VolumeControl>
-  );
-};
+  )
+}
 
 export interface AudioPlayerRateProps extends PlayerButtonProps {
-  rates?: number[];
+  rates?: number[]
 }
 
 export const AudioPlayerRate = ({
@@ -620,9 +620,9 @@ export const AudioPlayerRate = ({
   children,
   ...props
 }: AudioPlayerRateProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerRate");
-  const index = rates.indexOf(player.playbackRate);
-  const next = rates[(index + 1) % rates.length] ?? 1;
+  const { player } = useAudioPlayerPart("AudioPlayerRate")
+  const index = rates.indexOf(player.playbackRate)
+  const next = rates[(index + 1) % rates.length] ?? 1
   return usePlayerButton(
     "audio-player-rate",
     `Playback speed ${player.playbackRate}×`,
@@ -643,11 +643,11 @@ export const AudioPlayerRate = ({
       ...props,
       className: cn("w-auto px-2", props.className),
     }
-  );
-};
+  )
+}
 
 export const AudioPlayerLoop = (props: PlayerButtonProps) => {
-  const { player } = useAudioPlayerPart("AudioPlayerLoop");
+  const { player } = useAudioPlayerPart("AudioPlayerLoop")
   return usePlayerButton(
     "audio-player-loop",
     player.loop ? "Loop on" : "Loop off",
@@ -661,5 +661,5 @@ export const AudioPlayerLoop = (props: PlayerButtonProps) => {
       ),
     },
     { state: { looping: player.loop } }
-  );
-};
+  )
+}

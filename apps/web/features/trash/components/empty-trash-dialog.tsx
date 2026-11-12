@@ -12,11 +12,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
-import { useEmptyTrashMutation } from "@/features/folder/api"
 import { parseErr } from "@/store/utils"
 import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outline"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
+import { useEmptyTrashMutation } from "../api"
 
 export function EmptyTrashDialog({ disabled }: { disabled?: boolean }) {
   const t = useTranslations()
