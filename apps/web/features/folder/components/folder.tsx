@@ -27,6 +27,7 @@ import { Folder as FolderType } from "../types"
 import { FolderDetailsDialog } from "./folder-details-dialog"
 import { MoveFolderDialog } from "./move-folder-dialog"
 import { RenameFolderDialog } from "./rename-folder-dialog"
+import { TrashFolderDialog } from "./trash-folder-dialog"
 
 export function Folder({
   folder,
@@ -42,6 +43,7 @@ export function Folder({
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isTrashOpen, setIsTrashOpen] = useState(false)
 
   return (
     <>
@@ -88,7 +90,10 @@ export function Folder({
                 {t("common.move")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setIsTrashOpen(true)}
+              >
                 <TrashBinTrashOutlineIcon />
                 {t("common.trash")}
               </DropdownMenuItem>
@@ -110,6 +115,11 @@ export function Folder({
       <MoveFolderDialog
         open={isMoveOpen}
         onOpenChange={setIsMoveOpen}
+        folder={folder}
+      />
+      <TrashFolderDialog
+        open={isTrashOpen}
+        onOpenChange={setIsTrashOpen}
         folder={folder}
       />
     </>

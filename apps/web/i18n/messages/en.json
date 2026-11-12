@@ -87,6 +87,9 @@
       "rejected": "This file can't be uploaded.",
       "uploading": "Uploading file"
     },
+    "trashFolder": {
+      "description": "Move “{name}” to the trash? You can restore it later."
+    },
     "empty": {
       "title": "Nothing here yet",
       "description": "Upload a file or create a folder using the plus button."
