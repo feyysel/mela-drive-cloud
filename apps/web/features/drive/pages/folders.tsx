@@ -25,6 +25,7 @@ import { Folder } from "@/features/folder/components/folder"
 import FolderOpenOutlineIcon from "@iconify-react/solar/folder-open-outline"
 import { LayoutGridIcon, ListIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 import { parseAsStringLiteral, useQueryState } from "nuqs"
 import { AddButton } from "../components/add-button"
 
@@ -49,7 +50,7 @@ export function Folders({ folderId }: { folderId: string }) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
-                href={view ? `/drive?view=${view}` : "/drive"}
+                render={<Link href={view ? `/drive?view=${view}` : "/drive"} />}
                 className="text-xl font-medium"
               >
                 {t("navigation.myDrive")}

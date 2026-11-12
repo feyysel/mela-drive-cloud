@@ -113,7 +113,11 @@ export function File({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
-        onClick={isPreviewable ? () => setIsPreviewOpen(true) : undefined}
+        onClick={
+          !file.deletedAt && isPreviewable
+            ? () => setIsPreviewOpen(true)
+            : undefined
+        }
       >
         <AttachmentMedia className="bg-transparent">
           {isRestoringFile || isPurgingFile ? (

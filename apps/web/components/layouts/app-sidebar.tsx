@@ -23,6 +23,7 @@ import { LogOutIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { parseAsStringLiteral, useQueryState } from "nuqs"
 import { ComponentType } from "react"
 import { Progress } from "../ui/progress"
 import { Skeleton } from "../ui/skeleton"
@@ -35,10 +36,17 @@ type NavLink = {
   icon: ComponentType
 }
 
+const views = ["grid", "list"] as const
+type DriveView = (typeof views)[number]
+
 export function AppSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const t = useTranslations()
+  const [view] = useQueryState(
+    "view",
+    parseAsStringLiteral(views).withDefault("grid")
+  )
   const { data, isLoading } = useMeQuery()
   const { toggleSidebar } = useSidebar()
   const isMobile = useIsMobile()
@@ -47,12 +55,12 @@ export function AppSidebar() {
   const navLinks: NavLink[] = [
     {
       title: t("navigation.myDrive"),
-      url: "/drive",
+      url: view ? `/drive?view=${view}` : "/drive",
       icon: Folder2OutlineIcon,
     },
     {
       title: t("navigation.trash"),
-      url: "/trash",
+      url: view ? `/trash?view=${view}` : "/trash",
       icon: TrashBinTrashOutlineIcon,
     },
   ]

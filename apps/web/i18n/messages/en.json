@@ -111,5 +111,11 @@
     "title": "Drag and drop files here",
     "description": "Documents, images, videos and more",
     "cta": "Browse files"
+  },
+  "trash": {
+    "empty": {
+      "title": "Trash is empty",
+      "description": "Items you move to trash will appear here."
+    }
   }
 }
