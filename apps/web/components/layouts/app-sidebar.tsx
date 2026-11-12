@@ -25,6 +25,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { parseAsStringLiteral, useQueryState } from "nuqs"
 import { ComponentType } from "react"
+import { Logo } from "../ui/logo"
 import { Progress } from "../ui/progress"
 import { Skeleton } from "../ui/skeleton"
 import { Spinner } from "../ui/spinner"
@@ -79,9 +80,12 @@ export function AppSidebar() {
       <SidebarHeader className="min-h-16 bg-background">
         <SidebarMenu className="my-auto">
           <SidebarMenuItem>
-            <h1 className="ml-2 text-lg font-medium whitespace-nowrap">
-              {t("site.name")}
-            </h1>
+            <div className="flex items-center gap-2">
+              <Logo className="size-5 shrink-0" />
+              <h1 className="text-lg font-medium whitespace-nowrap">
+                {t("site.name")}
+              </h1>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
