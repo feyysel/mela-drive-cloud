@@ -38,7 +38,6 @@ type NavLink = {
 }
 
 const views = ["grid", "list"] as const
-type DriveView = (typeof views)[number]
 
 export function AppSidebar() {
   const router = useRouter()

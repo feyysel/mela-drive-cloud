@@ -54,10 +54,19 @@ function resolveMimeType({
 }
 
 function getIcon(type: string) {
-  if (type.startsWith("image/")) return GalleryBoldIcon
-  if (type.startsWith("video/")) return VideocameraRecordBoldIcon
-  if (type.startsWith("audio/")) return MusicNoteBoldIcon
-  return FileTextBoldIcon
+  if (type.startsWith("image/")) {
+    return <GalleryBoldIcon className="size-6" />
+  }
+
+  if (type.startsWith("video/")) {
+    return <VideocameraRecordBoldIcon className="size-6" />
+  }
+
+  if (type.startsWith("audio/")) {
+    return <MusicNoteBoldIcon className="size-6" />
+  }
+
+  return <FileTextBoldIcon className="size-6" />
 }
 
 export function File({
@@ -85,7 +94,7 @@ export function File({
   const isImage = mimeType.startsWith("image/")
   const isPdf = mimeType === "application/pdf"
   const isPreviewable = isVideo || isAudio || isImage || isPdf
-  const Icon = getIcon(mimeType)
+  const icon = getIcon(mimeType)
 
   const handleRestore = async () => {
     try {
@@ -125,7 +134,7 @@ export function File({
           {isRestoringFile || isPurgingFile ? (
             <Spinner className="size-6" />
           ) : (
-            <Icon className="size-6" />
+            icon
           )}
         </AttachmentMedia>
         <AttachmentContent>
