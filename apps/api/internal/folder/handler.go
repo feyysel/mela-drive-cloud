@@ -47,7 +47,7 @@ func (h *Handler) Get(ctx *gin.Context) {
 
 	folderID, err := ginx.Param(ctx, "folderID")
 	if err != nil {
-		res.Error(ctx, errs.Wrap(errs.ErrInvalidInput, "Invalid folder ID"))
+		res.Error(ctx, err)
 		return
 	}
 
@@ -95,9 +95,9 @@ func (h *Handler) Rename(ctx *gin.Context) {
 		return
 	}
 
-	folderID, err := uuid.Parse(ctx.Param("folderID"))
+	folderID, err := ginx.Param(ctx, "folderID")
 	if err != nil {
-		res.Error(ctx, errs.Wrap(errs.ErrInvalidInput, "Invalid folder ID"))
+		res.Error(ctx, err)
 		return
 	}
 
@@ -142,4 +142,83 @@ func (h *Handler) Move(ctx *gin.Context) {
 	}
 
 	res.OK(ctx, folder)
+}
+
+func (h *Handler) Trash(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	folderID, err := ginx.Param(ctx, "folderID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Trash(ctx, ownerID, folderID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
+}
+
+func (h *Handler) ListTrashed(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	folders, err := h.svc.ListTrashed(ctx, ownerID)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.OK(ctx, folders)
+}
+
+func (h *Handler) Restore(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	folderID, err := ginx.Param(ctx, "folderID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Restore(ctx, ownerID, folderID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
+}
+
+func (h *Handler) Purge(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	folderID, err := ginx.Param(ctx, "folderID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Purge(ctx, ownerID, folderID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
 }

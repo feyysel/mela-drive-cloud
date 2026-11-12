@@ -3,6 +3,7 @@ package folder
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/feyysel/mela-drive-cloud/internal/errs"
 	"github.com/feyysel/mela-drive-cloud/internal/stringsx"
@@ -17,11 +18,17 @@ const (
 )
 
 type Service struct {
-	repo Repository
+	repo       Repository
+	userSvc    UserService
+	storageSvc StorageService
 }
 
-func NewService(repo Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo Repository, userSvc UserService, storageSvc StorageService) *Service {
+	return &Service{
+		repo:       repo,
+		userSvc:    userSvc,
+		storageSvc: storageSvc,
+	}
 }
 
 func (s *Service) Create(ctx context.Context, ownerID uuid.UUID, parentID *uuid.UUID, name string) (*Folder, error) {
@@ -142,4 +149,92 @@ func (s *Service) Move(ctx context.Context, ownerID, folderID uuid.UUID, newPare
 	}
 
 	return moved, nil
+}
+
+func (s *Service) Trash(ctx context.Context, ownerID, folderID uuid.UUID) error {
+	if err := s.repo.Trash(ctx, ownerID, folderID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFolderNotFound)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) ListTrashed(ctx context.Context, ownerID uuid.UUID) ([]*Folder, error) {
+	return s.repo.ListTrashed(ctx, ownerID)
+}
+
+func (s *Service) Restore(ctx context.Context, ownerID, folderID uuid.UUID) error {
+	trashed, err := s.repo.GetTrashed(ctx, ownerID, folderID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFolderNotFound)
+		}
+
+		return err
+	}
+
+	parentID := trashed.ParentID
+
+	if parentID != nil {
+		if _, err := s.repo.Get(ctx, ownerID, *parentID); err != nil {
+			if !errors.Is(err, errs.ErrNotFound) {
+				return err
+			}
+
+			parentID = nil
+		}
+	}
+
+	if err := s.repo.Restore(ctx, ownerID, folderID, parentID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFolderNotFound)
+		}
+
+		if errors.Is(err, errs.ErrConflict) {
+			return errs.Wrap(errs.ErrConflict, msgNameInUse)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Purge(ctx context.Context, ownerID, folderID uuid.UUID) error {
+	if _, err := s.repo.GetTrashed(ctx, ownerID, folderID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFolderNotFound)
+		}
+
+		return err
+	}
+
+	keys, totalSize, err := s.repo.ListFileKeys(ctx, ownerID, folderID)
+	if err != nil {
+		return err
+	}
+
+	for _, key := range keys {
+		if err := s.storageSvc.Delete(ctx, key); err != nil {
+			return err
+		}
+	}
+
+	if err := s.repo.Delete(ctx, ownerID, folderID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFolderNotFound)
+		}
+
+		return err
+	}
+
+	if err := s.userSvc.ReleaseStorage(ctx, ownerID, totalSize); err != nil {
+		slog.ErrorContext(ctx, "failed to release storage after folder purge", "user_id", ownerID, "size_bytes", totalSize, "err", err)
+	}
+
+	return nil
 }

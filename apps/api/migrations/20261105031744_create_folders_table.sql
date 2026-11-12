@@ -8,7 +8,7 @@ CREATE TABLE folders (
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     FOREIGN KEY (owner_id) REFERENCES users (id),
-    FOREIGN KEY (parent_id) REFERENCES folders (id),
+    FOREIGN KEY (parent_id) REFERENCES folders (id) ON DELETE CASCADE,
     INDEX folders_owner_parent_idx (owner_id, parent_id),
     INDEX folders_trash_idx (deleted_at),
     UNIQUE INDEX folders_unique_name_idx ((IF(deleted_at IS NULL, CONCAT(owner_id, ':', COALESCE(parent_id, 'root'), ':', name), NULL)))

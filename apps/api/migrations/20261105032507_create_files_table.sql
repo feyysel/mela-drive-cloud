@@ -11,7 +11,7 @@ CREATE TABLE files (
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     FOREIGN KEY (owner_id) REFERENCES users (id),
-    FOREIGN KEY (folder_id) REFERENCES folders (id),
+    FOREIGN KEY (folder_id) REFERENCES folders (id) ON DELETE CASCADE,
     INDEX files_owner_folder_idx (owner_id, folder_id),
     INDEX files_trash_idx (deleted_at),
     UNIQUE INDEX files_unique_name_idx ((IF(deleted_at IS NULL, CONCAT(owner_id, ':', COALESCE(folder_id, 'root'), ':', name), NULL)))

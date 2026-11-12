@@ -57,6 +57,43 @@ export const folderApi = api.injectEndpoints({
         { type: "Folder", id: "LIST" },
       ],
     }),
+    listTrashedFolders: build.query<Folder[], void>({
+      query: () => "/folders/trash",
+      providesTags: [{ type: "Folder", id: "TRASH_LIST" }],
+    }),
+    trashFolder: build.mutation<void, string>({
+      query: (folderId) => ({
+        url: `/folders/${folderId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, folderId) => [
+        { type: "Folder", id: folderId },
+        { type: "Folder", id: "LIST" },
+        { type: "Folder", id: "TRASH_LIST" },
+      ],
+    }),
+    restoreFolder: build.mutation<void, string>({
+      query: (folderId) => ({
+        url: `/folders/${folderId}/restore`,
+        method: "POST",
+      }),
+      invalidatesTags: [
+        { type: "Folder", id: "LIST" },
+        { type: "Folder", id: "TRASH_LIST" },
+      ],
+    }),
+    purgeFolder: build.mutation<void, string>({
+      query: (folderId) => ({
+        url: `/folders/${folderId}/purge`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Folder", id: "TRASH_LIST" },
+        { type: "File", id: "LIST" },
+        { type: "File", id: "TRASH_LIST" },
+        "User",
+      ],
+    }),
   }),
 })
 
@@ -66,4 +103,8 @@ export const {
   useCreateFolderMutation,
   useRenameFolderMutation,
   useMoveFolderMutation,
+  useListTrashedFoldersQuery,
+  useTrashFolderMutation,
+  useRestoreFolderMutation,
+  usePurgeFolderMutation,
 } = folderApi

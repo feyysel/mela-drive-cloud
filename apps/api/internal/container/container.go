@@ -64,8 +64,8 @@ func New(cfg config.Config) (*Container, error) {
 	sessSvc := session.NewService(session.NewCache(redisClient), cfg.Session)
 	mailSvc := mail.NewService(resendClient)
 	authSvc := auth.NewService(auth.NewCache(redisClient), userSvc, sessSvc, mailSvc, cfg.App, cfg.Mail)
-	folderSvc := folder.NewService(folder.NewRepository(pool))
 	storageSvc := storage.NewService(cfg.Storage)
+	folderSvc := folder.NewService(folder.NewRepository(pool), userSvc, storageSvc)
 	fileSvc := file.NewService(file.NewRepository(pool), userSvc, folderSvc, storageSvc)
 
 	ok = true
