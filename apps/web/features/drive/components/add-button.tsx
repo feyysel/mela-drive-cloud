@@ -5,8 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import AddFolderOutlineIcon from "@iconify-react/solar/add-folder-outline"
-import FileSendOutlineIcon from "@iconify-react/solar/file-send-outline"
+import AddFolderBoldIcon from "@iconify-react/solar/add-folder-bold"
+import FileSendBoldIcon from "@iconify-react/solar/file-send-bold"
 import { PlusIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -34,11 +34,11 @@ export function AddButton({ folderId }: { folderId?: string }) {
         />
         <DropdownMenuContent align="end" side="top" sideOffset={20}>
           <DropdownMenuItem onClick={() => setIsFolderOpen(true)}>
-            <AddFolderOutlineIcon />
+            <AddFolderBoldIcon />
             {t("drive.newFolder")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsUploadOpen(true)}>
-            <FileSendOutlineIcon />
+            <FileSendBoldIcon />
             {t("drive.uploadFile")}
           </DropdownMenuItem>
         </DropdownMenuContent>
