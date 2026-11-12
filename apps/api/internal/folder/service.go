@@ -238,3 +238,18 @@ func (s *Service) Purge(ctx context.Context, ownerID, folderID uuid.UUID) error 
 
 	return nil
 }
+
+func (s *Service) EmptyTrash(ctx context.Context, ownerID uuid.UUID) error {
+	folders, err := s.repo.ListTrashed(ctx, ownerID)
+	if err != nil {
+		return err
+	}
+
+	for _, folder := range folders {
+		if err := s.Purge(ctx, ownerID, folder.ID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

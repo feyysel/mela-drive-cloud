@@ -17,6 +17,7 @@ import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outli
 import { LayoutGridIcon, ListIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { parseAsStringLiteral, useQueryState } from "nuqs"
+import { EmptyTrashDialog } from "../components/empty-trash-dialog"
 
 const views = ["grid", "list"] as const
 type DriveView = (typeof views)[number]
@@ -37,19 +38,29 @@ export function Trash() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-medium">{t("navigation.trash")}</h1>
 
-        <Tabs
-          value={view}
-          onValueChange={(value) => setView(value as DriveView)}
-        >
-          <TabsList>
-            <TabsTrigger value="grid" aria-label="Grid view">
-              <LayoutGridIcon />
-            </TabsTrigger>
-            <TabsTrigger value="list" aria-label="List view">
-              <ListIcon />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-3">
+          <EmptyTrashDialog
+            disabled={
+              isLoadingFiles ||
+              isLoadingFolders ||
+              (!folders?.length && !files?.length)
+            }
+          />
+
+          <Tabs
+            value={view}
+            onValueChange={(value) => setView(value as DriveView)}
+          >
+            <TabsList>
+              <TabsTrigger value="grid" aria-label="Grid view">
+                <LayoutGridIcon />
+              </TabsTrigger>
+              <TabsTrigger value="list" aria-label="List view">
+                <ListIcon />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {isLoadingFiles || isLoadingFolders ? (
