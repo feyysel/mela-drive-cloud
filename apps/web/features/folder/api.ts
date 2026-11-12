@@ -94,6 +94,19 @@ export const folderApi = api.injectEndpoints({
         "User",
       ],
     }),
+    emptyTrash: build.mutation<void, void>({
+      query: () => ({
+        url: "/folders/trash",
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Folder", id: "TRASH_LIST" },
+        { type: "Folder", id: "LIST" },
+        { type: "File", id: "TRASH_LIST" },
+        { type: "File", id: "LIST" },
+        "User",
+      ],
+    }),
   }),
 })
 
@@ -107,4 +120,5 @@ export const {
   useTrashFolderMutation,
   useRestoreFolderMutation,
   usePurgeFolderMutation,
+  useEmptyTrashMutation,
 } = folderApi

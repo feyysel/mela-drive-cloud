@@ -15,6 +15,7 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler, limit *ratelimit.
 	folders.POST("", restricted, handler.Create)
 	folders.GET("", general, handler.List)
 	folders.GET("/trash", general, handler.ListTrashed)
+	folders.DELETE("/trash", restricted, handler.EmptyTrash)
 	folders.GET("/:folderID", general, handler.Get)
 	folders.PATCH("/:folderID/name", restricted, handler.Rename)
 	folders.PATCH("/:folderID/parent", restricted, handler.Move)
