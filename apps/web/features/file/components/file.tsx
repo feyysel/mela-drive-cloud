@@ -107,10 +107,12 @@ export function File({
     <>
       <Attachment
         className={cn(
-          "w-full cursor-pointer",
-          view === "list"
-            ? "rounded-none border-0 bg-transparent hover:bg-muted/50"
-            : "bg-muted/50 hover:bg-muted",
+          "w-full",
+          !file.deletedAt && "cursor-pointer",
+          !file.deletedAt &&
+            (view === "list"
+              ? "rounded-none border-0 bg-transparent hover:bg-muted/50"
+              : "bg-muted/50 hover:bg-muted"),
           view === "list" && index > 0 && "border-t"
         )}
         onClick={

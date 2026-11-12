@@ -93,8 +93,8 @@ export function AppSidebar() {
               <SidebarMenuItem key={navLink.title}>
                 <SidebarMenuButton
                   isActive={
-                    pathname === navLink.url ||
-                    pathname.startsWith(`${navLink.url}/`)
+                    pathname === navLink.url.split("?")[0] ||
+                    pathname.startsWith(`${navLink.url.split("?")[0]}/`)
                   }
                   render={
                     <Link

@@ -74,10 +74,11 @@ export function Folder({
     <>
       <Attachment
         className={cn(
-          "w-full cursor-pointer",
-          view === "list"
-            ? "rounded-none border-0 bg-transparent hover:bg-muted/50"
-            : "bg-muted/50 hover:bg-muted",
+          "w-full",
+          !folder.deletedAt &&
+            (view === "list"
+              ? "cursor-pointer rounded-none border-0 bg-transparent hover:bg-muted/50"
+              : "cursor-pointer bg-muted/50 hover:bg-muted"),
           view === "list" && index > 0 && "border-t"
         )}
         onClick={
