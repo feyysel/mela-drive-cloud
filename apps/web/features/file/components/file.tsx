@@ -36,6 +36,7 @@ import { AudioPlayerDialog } from "./audio-player-dialog"
 import { FileDetailsDialog } from "./file-details-dialog"
 import { ImageViewerDialog } from "./image-viewer-dialog"
 import { PdfViewerDialog } from "./pdf-viewer-dialog"
+import { TrashFileDialog } from "./trash-file-dialog"
 import { VideoPlayerDialog } from "./video-player-dialog"
 
 function resolveMimeType({
@@ -67,6 +68,7 @@ export function File({
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isTrashOpen, setIsTrashOpen] = useState(false)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   const mimeType = resolveMimeType(file)
@@ -125,7 +127,10 @@ export function File({
                 {t("common.move")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setIsTrashOpen(true)}
+              >
                 <TrashBinTrashOutlineIcon />
                 {t("common.trash")}
               </DropdownMenuItem>
@@ -147,6 +152,11 @@ export function File({
       <MoveFileDialog
         open={isMoveOpen}
         onOpenChange={setIsMoveOpen}
+        file={file}
+      />
+      <TrashFileDialog
+        open={isTrashOpen}
+        onOpenChange={setIsTrashOpen}
         file={file}
       />
 

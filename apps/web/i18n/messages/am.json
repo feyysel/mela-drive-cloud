@@ -90,6 +90,9 @@
     "trashFolder": {
       "description": "“{name}” ወደ መጣያ ይውሰድ? በኋላ መመለስ ይችላሉ።"
     },
+    "trashFile": {
+      "description": "“{name}” ወደ መጣያ ይውሰድ? በኋላ መመለስ ይችላሉ።"
+    },
     "empty": {
       "title": "እስካሁን ምንም የለም",
       "description": "የመደመር አዝራሩን በመጠቀም ፋይል ይስቀሉ ወይም አቃፊ ይፍጠሩ።"
