@@ -48,7 +48,10 @@ export function Folders({ folderId }: { folderId: string }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/drive" className="text-xl font-medium">
+              <BreadcrumbLink
+                href={view ? `/drive?view=${view}` : "/drive"}
+                className="text-xl font-medium"
+              >
                 {t("navigation.myDrive")}
               </BreadcrumbLink>
             </BreadcrumbItem>

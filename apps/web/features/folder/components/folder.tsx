@@ -55,7 +55,13 @@ export function Folder({
             : "bg-muted/50 hover:bg-muted",
           view === "list" && index > 0 && "border-t"
         )}
-        onClick={() => router.push(`/drive/folders/${folder.id}`)}
+        onClick={() =>
+          router.push(
+            view === "list"
+              ? `/drive/folders/${folder.id}?view=list`
+              : `/drive/folders/${folder.id}`
+          )
+        }
       >
         <AttachmentMedia className="bg-transparent">
           <FolderOpenBoldIcon className="size-6" />
