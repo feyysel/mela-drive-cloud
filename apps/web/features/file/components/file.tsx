@@ -19,11 +19,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Spinner } from "@/components/ui/spinner"
+import { toast } from "@/components/ui/toast"
+import { parseErr } from "@/store/utils"
 import FileTextBoldIcon from "@iconify-react/solar/file-text-bold"
 import GalleryBoldIcon from "@iconify-react/solar/gallery-bold"
 import MoveToFolderOutlineIcon from "@iconify-react/solar/move-to-folder-outline"
 import MusicNoteBoldIcon from "@iconify-react/solar/music-note-bold"
 import PenNewSquareOutlineIcon from "@iconify-react/solar/pen-new-square-outline"
+import RefreshCircleOutlineIcon from "@iconify-react/solar/refresh-circle-outline"
 import TrashBinTrashOutlineIcon from "@iconify-react/solar/trash-bin-trash-outline"
 import VideocameraRecordBoldIcon from "@iconify-react/solar/videocamera-record-bold"
 import { cn } from "cn"
@@ -32,6 +36,7 @@ import { MoreVerticalIcon } from "lucide-react"
 import { lookup } from "mime-types"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
+import { usePurgeFileMutation, useRestoreFileMutation } from "../api"
 import { AudioPlayerDialog } from "./audio-player-dialog"
 import { FileDetailsDialog } from "./file-details-dialog"
 import { ImageViewerDialog } from "./image-viewer-dialog"
@@ -71,6 +76,9 @@ export function File({
   const [isTrashOpen, setIsTrashOpen] = useState(false)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
+  const [restoreFile, { isLoading: isRestoringFile }] = useRestoreFileMutation()
+  const [purgeFile, { isLoading: isPurgingFile }] = usePurgeFileMutation()
+
   const mimeType = resolveMimeType(file)
   const isVideo = mimeType.startsWith("video/")
   const isAudio = mimeType.startsWith("audio/")
@@ -78,6 +86,22 @@ export function File({
   const isPdf = mimeType === "application/pdf"
   const isPreviewable = isVideo || isAudio || isImage || isPdf
   const Icon = getIcon(mimeType)
+
+  const handleRestore = async () => {
+    try {
+      await restoreFile(file.id).unwrap()
+    } catch (error: unknown) {
+      toast.add({ type: "error", title: parseErr(error).message })
+    }
+  }
+
+  const handlePurge = async () => {
+    try {
+      await purgeFile(file.id).unwrap()
+    } catch (error: unknown) {
+      toast.add({ type: "error", title: parseErr(error).message })
+    }
+  }
 
   return (
     <>
@@ -92,7 +116,11 @@ export function File({
         onClick={isPreviewable ? () => setIsPreviewOpen(true) : undefined}
       >
         <AttachmentMedia className="bg-transparent">
-          <Icon className="size-6" />
+          {isRestoringFile || isPurgingFile ? (
+            <Spinner className="size-6" />
+          ) : (
+            <Icon className="size-6" />
+          )}
         </AttachmentMedia>
         <AttachmentContent>
           <AttachmentTitle>{file.name}</AttachmentTitle>
@@ -113,27 +141,42 @@ export function File({
               <MoreVerticalIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
-                <InfoCircleOutlineIcon />
-                {t("common.details")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
-                <PenNewSquareOutlineIcon />
-                {t("common.rename")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
-                <MoveToFolderOutlineIcon />
-                {t("common.move")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setIsTrashOpen(true)}
-              >
-                <TrashBinTrashOutlineIcon />
-                {t("common.trash")}
-              </DropdownMenuItem>
+              {file.deletedAt ? (
+                <>
+                  <DropdownMenuItem onClick={handleRestore}>
+                    <RefreshCircleOutlineIcon />
+                    {t("common.restore")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive" onClick={handlePurge}>
+                    <TrashBinTrashOutlineIcon />
+                    {t("common.deletePermanently")}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
+                    <InfoCircleOutlineIcon />
+                    {t("common.details")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
+                    <PenNewSquareOutlineIcon />
+                    {t("common.rename")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
+                    <MoveToFolderOutlineIcon />
+                    {t("common.move")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => setIsTrashOpen(true)}
+                  >
+                    <TrashBinTrashOutlineIcon />
+                    {t("common.trash")}
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </AttachmentActions>

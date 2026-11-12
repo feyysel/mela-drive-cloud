@@ -15,7 +15,9 @@
     "eg": "e.g.",
     "details": "Details",
     "logout": "Logout",
-    "pleaseWait": "Please wait"
+    "pleaseWait": "Please wait",
+    "restore": "Restore",
+    "deletePermanently": "Delete permanently"
   },
   "errors": {
     "unexpected": "An unexpected error occurred",

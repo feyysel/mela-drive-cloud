@@ -15,7 +15,9 @@
     "eg": "ለምሳሌ፦",
     "details": "ዝርዝር",
     "logout": "ውጣ",
-    "pleaseWait": "እባክዎ ይጠብቁ"
+    "pleaseWait": "እባክዎ ይጠብቁ",
+    "restore": "መልስ",
+    "deletePermanently": "ለዘላለም ሰርዝ"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",
