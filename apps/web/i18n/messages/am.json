@@ -14,7 +14,8 @@
     "moreActions": "ተጨማሪ እርምጃዎች",
     "eg": "ለምሳሌ፦",
     "details": "ዝርዝር",
-    "logout": "ውጣ"
+    "logout": "ውጣ",
+    "pleaseWait": "እባክዎ ይጠብቁ"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",
@@ -83,7 +84,8 @@
     "upload": {
       "title": "ፋይል መጫን",
       "tooLarge": "ፋይሉ በጣም ትልቅ ነው። ከፍተኛው መጠን 100 ሜባ ነው።",
-      "rejected": "ይህ ፋይል መጫን አይቻልም።"
+      "rejected": "ይህ ፋይል መጫን አይቻልም።",
+      "uploading": "ፋይል በመጫን ላይ"
     },
     "empty": {
       "title": "እስካሁን ምንም የለም",
