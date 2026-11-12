@@ -80,7 +80,7 @@ func (h *Handler) Get(ctx *gin.Context) {
 
 	fileID, err := ginx.Param(ctx, "fileID")
 	if err != nil {
-		res.Error(ctx, errs.Wrap(errs.ErrInvalidInput, "Invalid file ID"))
+		res.Error(ctx, err)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (h *Handler) Rename(ctx *gin.Context) {
 
 	fileID, err := ginx.Param(ctx, "fileID")
 	if err != nil {
-		res.Error(ctx, errs.Wrap(errs.ErrInvalidInput, "Invalid file ID"))
+		res.Error(ctx, err)
 		return
 	}
 
@@ -158,7 +158,7 @@ func (h *Handler) Move(ctx *gin.Context) {
 
 	fileID, err := ginx.Param(ctx, "fileID")
 	if err != nil {
-		res.Error(ctx, errs.Wrap(errs.ErrInvalidInput, "Invalid file ID"))
+		res.Error(ctx, err)
 		return
 	}
 
@@ -175,4 +175,83 @@ func (h *Handler) Move(ctx *gin.Context) {
 	}
 
 	res.OK(ctx, file)
+}
+
+func (h *Handler) Trash(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	fileID, err := ginx.Param(ctx, "fileID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Trash(ctx, ownerID, fileID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
+}
+
+func (h *Handler) ListTrashed(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	files, err := h.svc.ListTrashed(ctx, ownerID)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.OK(ctx, files)
+}
+
+func (h *Handler) Restore(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	fileID, err := ginx.Param(ctx, "fileID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Restore(ctx, ownerID, fileID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
+}
+
+func (h *Handler) Purge(ctx *gin.Context) {
+	ownerID, err := ginx.UserID(ctx)
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	fileID, err := ginx.Param(ctx, "fileID")
+	if err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	if err := h.svc.Purge(ctx, ownerID, fileID); err != nil {
+		res.Error(ctx, err)
+		return
+	}
+
+	res.NoContent(ctx)
 }

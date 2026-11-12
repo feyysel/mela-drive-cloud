@@ -1,7 +1,7 @@
 export type DriveFile = {
   id: string
   ownerId: string
-  folderId: string | null
+  folderId?: string
   name: string
   sizeBytes: number
   mimeType: string
@@ -21,5 +21,5 @@ export type RenameFileRequest = {
 }
 
 export type MoveFileRequest = {
-  folderId: string | null
+  folderId?: string
 }

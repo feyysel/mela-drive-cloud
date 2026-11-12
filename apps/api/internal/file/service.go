@@ -200,3 +200,85 @@ func (s *Service) Move(ctx context.Context, ownerID, fileID uuid.UUID, newFolder
 
 	return moved, nil
 }
+
+func (s *Service) Trash(ctx context.Context, ownerID, fileID uuid.UUID) error {
+	if err := s.repo.Trash(ctx, ownerID, fileID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFileNotFound)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) ListTrashed(ctx context.Context, ownerID uuid.UUID) ([]*File, error) {
+	return s.repo.ListTrashed(ctx, ownerID)
+}
+
+func (s *Service) Restore(ctx context.Context, ownerID, fileID uuid.UUID) error {
+	trashed, err := s.repo.GetTrashed(ctx, ownerID, fileID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFileNotFound)
+		}
+
+		return err
+	}
+
+	folderID := trashed.FolderID
+
+	if folderID != nil {
+		if _, err := s.folderSvc.Get(ctx, ownerID, *folderID); err != nil {
+			if !errors.Is(err, errs.ErrNotFound) {
+				return err
+			}
+
+			folderID = nil
+		}
+	}
+
+	if err := s.repo.Restore(ctx, ownerID, fileID, folderID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFileNotFound)
+		}
+
+		if errors.Is(err, errs.ErrConflict) {
+			return errs.Wrap(errs.ErrConflict, msgNameInUse)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Purge(ctx context.Context, ownerID, fileID uuid.UUID) error {
+	trashed, err := s.repo.GetTrashed(ctx, ownerID, fileID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFileNotFound)
+		}
+
+		return err
+	}
+
+	if err := s.storageSvc.Delete(ctx, trashed.StorageKey); err != nil {
+		return err
+	}
+
+	if err := s.repo.Delete(ctx, ownerID, fileID); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return errs.Wrap(errs.ErrNotFound, msgFileNotFound)
+		}
+
+		return err
+	}
+
+	if err := s.userSvc.ReleaseStorage(ctx, ownerID, trashed.SizeBytes); err != nil {
+		slog.ErrorContext(ctx, "failed to release storage after purge", "user_id", ownerID, "size_bytes", trashed.SizeBytes, "err", err)
+	}
+
+	return nil
+}

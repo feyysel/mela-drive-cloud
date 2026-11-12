@@ -4,7 +4,7 @@ import type { User } from "./types"
 export const userApi = api.injectEndpoints({
   endpoints: (build) => ({
     me: build.query<User, void>({
-      query: () => "/me",
+      query: () => "/users/me",
       providesTags: ["User"],
     }),
   }),

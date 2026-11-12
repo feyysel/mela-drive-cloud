@@ -1,5 +1,6 @@
 "use client"
 
+import GlobalOutlineIcon from "@iconify-react/solar/global-outline"
 import { useLocale } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
@@ -16,8 +17,8 @@ import { setLocale } from "@/i18n/actions"
 import type { Locale } from "@/i18n/config"
 
 const items: { label: string; value: Locale }[] = [
-  { label: "English", value: "en" },
-  { label: "አማርኛ", value: "am" },
+  { label: "En", value: "en" },
+  { label: "አማ", value: "am" },
 ]
 
 export function LocaleSwitcher() {
@@ -41,7 +42,8 @@ export function LocaleSwitcher() {
         if (value) change(value as Locale)
       }}
     >
-      <SelectTrigger className="w-36">
+      <SelectTrigger className="w-24">
+        <GlobalOutlineIcon className="size-4" />
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -14,7 +14,11 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler, limit *ratelimit.
 
 	files.POST("", restricted, handler.Upload)
 	files.GET("", general, handler.List)
+	files.GET("/trash", general, handler.ListTrashed)
 	files.GET("/:fileID", general, handler.Get)
 	files.PATCH("/:fileID/name", restricted, handler.Rename)
 	files.PATCH("/:fileID/folder", restricted, handler.Move)
+	files.DELETE("/:fileID", restricted, handler.Trash)
+	files.POST("/:fileID/restore", restricted, handler.Restore)
+	files.DELETE("/:fileID/purge", restricted, handler.Purge)
 }

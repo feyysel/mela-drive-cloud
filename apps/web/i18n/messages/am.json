@@ -1,13 +1,23 @@
 {
   "site": {
-    "name": "Mela Drive",
+    "name": "መላ ድራይቭ",
     "tagline": "ፋይሎችዎ። በደህንነት የተደራጁ።",
     "description": "Mela Drive ፋይሎችን በደህንነት ለማከማቸት፣ ለማደራጀት፣ ቅድመ እይታ ለማየት እና ለማጋራት የሚያስችል የፋይል አስተዳደር መድረክ ነው።"
   },
   "common": {
     "save": "አስቀምጥ",
+    "create": "ፍጠር",
     "cancel": "ሰርዝ",
-    "eg": "ለምሳሌ፦"
+    "rename": "ዳግም ሰይም",
+    "move": "አንቀሳቅስ",
+    "trash": "ወደ ቆሻሻ ውሰድ",
+    "moreActions": "ተጨማሪ እርምጃዎች",
+    "eg": "ለምሳሌ፦",
+    "details": "ዝርዝር",
+    "logout": "ውጣ",
+    "pleaseWait": "እባክዎ ይጠብቁ",
+    "restore": "መልስ",
+    "deletePermanently": "ለዘላለም ሰርዝ"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",
@@ -56,6 +66,56 @@
       "submit": "መለያ ፍጠር",
       "alreadyHaveAccount": "አስቀድመው መለያ አለዎት?",
       "login": "ግባ"
+    }
+  },
+  "navigation": {
+    "myDrive": "የእኔ ድራይቭ",
+    "trash": "መጣያ",
+    "storage": "ማከማቻ",
+    "storageUsed": "ከ {quota} {used} ተጠቅመዋል"
+  },
+  "drive": {
+    "add": "አዲስ",
+    "newFolder": "አዲስ አቃፊ",
+    "uploadFile": "ፋይል መጫን",
+    "createFolder": {
+      "title": "አዲስ አቃፊ",
+      "placeholder": "የአቃፊ ስም"
+    },
+    "file": { "placeholder": "የፋይል ስም" },
+    "upload": {
+      "title": "ፋይል መጫን",
+      "tooLarge": "ፋይሉ በጣም ትልቅ ነው። ከፍተኛው መጠን 100 ሜባ ነው።",
+      "rejected": "ይህ ፋይል መጫን አይቻልም።",
+      "uploading": "ፋይል በመጫን ላይ"
+    },
+    "trashFolder": {
+      "description": "“{name}” ወደ መጣያ ይውሰድ? በኋላ መመለስ ይችላሉ።"
+    },
+    "trashFile": {
+      "description": "“{name}” ወደ መጣያ ይውሰድ? በኋላ መመለስ ይችላሉ።"
+    },
+    "empty": {
+      "title": "እስካሁን ምንም የለም",
+      "description": "የመደመር አዝራሩን በመጠቀም ፋይል ይስቀሉ ወይም አቃፊ ይፍጠሩ።"
+    },
+    "details": {
+      "name": "ስም",
+      "type": "ዓይነት",
+      "size": "መጠን",
+      "created": "የተፈጠረበት",
+      "modified": "የተሻሻለበት"
+    }
+  },
+  "dropzone": {
+    "title": "ፋይሎችን እዚህ ጎትተው ይልቀቁ",
+    "description": "ሰነዶች፣ ምስሎች፣ ቪዲዮዎች እና ሌሎችም",
+    "cta": "ፋይል ይምረጡ"
+  },
+  "trash": {
+    "empty": {
+      "title": "ቆሻሻ ማስቀመጫው ባዶ ነው",
+      "description": "ወደ ቆሻሻ ማስቀመጫ የሚያንቀሳቅሷቸው ንጥሎች እዚህ ይታያሉ።"
     }
   }
 }
