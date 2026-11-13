@@ -17,7 +17,8 @@
     "logout": "ውጣ",
     "pleaseWait": "እባክዎ ይጠብቁ",
     "restore": "መልስ",
-    "deletePermanently": "ለዘላለም ሰርዝ"
+    "deletePermanently": "ለዘላለም ሰርዝ",
+    "download": "አውርድ"
   },
   "errors": {
     "unexpected": "ያልተጠበቀ ስህተት ተከስቷል",

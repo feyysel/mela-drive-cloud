@@ -14,7 +14,7 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User", "File", "Folder"],
     }),
     login: build.mutation<void, LoginRequest>({
       query: (body) => ({
@@ -22,13 +22,14 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User", "File", "Folder"],
     }),
     logout: build.mutation<void, void>({
       query: () => ({
         url: "/auth/logout",
         method: "POST",
       }),
+      invalidatesTags: ["User", "File", "Folder"],
     }),
     forgotPassword: build.mutation<void, ForgotPasswordRequest>({
       query: (body) => ({
