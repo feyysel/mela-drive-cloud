@@ -6,6 +6,7 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from "@/components/ui/attachment"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,66 +94,71 @@ export function Folder({
         }
       >
         <AttachmentMedia className="bg-transparent">
-          {isRestoringFolder || isPurgingFolder ? (
-            <Spinner className="size-6" />
-          ) : (
-            <FolderOpenBoldIcon className="size-6" />
-          )}
+          <FolderOpenBoldIcon className="size-6" />
         </AttachmentMedia>
         <AttachmentContent>
           <AttachmentTitle>{folder.name}</AttachmentTitle>
         </AttachmentContent>
         <AttachmentActions onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <AttachmentAction
-                  size="icon-lg"
-                  aria-label={t("common.moreActions")}
-                />
-              }
-            >
-              <MoreVerticalIcon />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {folder.deletedAt ? (
-                <>
-                  <DropdownMenuItem onClick={handleRestore}>
-                    <RefreshCircleOutlineIcon />
-                    {t("common.restore")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem variant="destructive" onClick={handlePurge}>
-                    <TrashBinTrashOutlineIcon />
-                    {t("common.deletePermanently")}
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
-                    <InfoCircleOutlineIcon />
-                    {t("common.details")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
-                    <PenNewSquareOutlineIcon />
-                    {t("common.rename")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
-                    <MoveToFolderOutlineIcon />
-                    {t("common.move")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => setIsTrashOpen(true)}
-                  >
-                    <TrashBinTrashOutlineIcon />
-                    {t("common.trash")}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isRestoringFolder || isPurgingFolder ? (
+            <Button size="icon-lg" variant="ghost" disabled>
+              <Spinner className="size-5" />
+            </Button>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <AttachmentAction
+                    size="icon-lg"
+                    aria-label={t("common.moreActions")}
+                  />
+                }
+              >
+                <MoreVerticalIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {folder.deletedAt ? (
+                  <>
+                    <DropdownMenuItem onClick={handleRestore}>
+                      <RefreshCircleOutlineIcon />
+                      {t("common.restore")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={handlePurge}
+                    >
+                      <TrashBinTrashOutlineIcon />
+                      {t("common.deletePermanently")}
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
+                      <InfoCircleOutlineIcon />
+                      {t("common.details")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
+                      <PenNewSquareOutlineIcon />
+                      {t("common.rename")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
+                      <MoveToFolderOutlineIcon />
+                      {t("common.move")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setIsTrashOpen(true)}
+                    >
+                      <TrashBinTrashOutlineIcon />
+                      {t("common.trash")}
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </AttachmentActions>
       </Attachment>
 

@@ -12,6 +12,7 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from "@/components/ui/attachment"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
+import { useDownload } from "@/hooks/use-download"
 import { parseErr } from "@/store/utils"
+import DownloadMinimalisticOutlineIcon from "@iconify-react/solar/download-minimalistic-outline"
 import FileTextBoldIcon from "@iconify-react/solar/file-text-bold"
 import GalleryBoldIcon from "@iconify-react/solar/gallery-bold"
 import MoveToFolderOutlineIcon from "@iconify-react/solar/move-to-folder-outline"
@@ -87,6 +90,7 @@ export function File({
 
   const [restoreFile, { isLoading: isRestoringFile }] = useRestoreFileMutation()
   const [purgeFile, { isLoading: isPurgingFile }] = usePurgeFileMutation()
+  const { downloadFile, isDownloading } = useDownload()
 
   const mimeType = resolveMimeType(file)
   const isVideo = mimeType.startsWith("video/")
@@ -130,13 +134,7 @@ export function File({
             : undefined
         }
       >
-        <AttachmentMedia className="bg-transparent">
-          {isRestoringFile || isPurgingFile ? (
-            <Spinner className="size-6" />
-          ) : (
-            icon
-          )}
-        </AttachmentMedia>
+        <AttachmentMedia className="bg-transparent">{icon}</AttachmentMedia>
         <AttachmentContent>
           <AttachmentTitle>{file.name}</AttachmentTitle>
           <AttachmentDescription className="uppercase">
@@ -144,56 +142,71 @@ export function File({
           </AttachmentDescription>
         </AttachmentContent>
         <AttachmentActions onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <AttachmentAction
-                  size="icon-lg"
-                  aria-label={t("common.moreActions")}
-                />
-              }
-            >
-              <MoreVerticalIcon />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {file.deletedAt ? (
-                <>
-                  <DropdownMenuItem onClick={handleRestore}>
-                    <RefreshCircleOutlineIcon />
-                    {t("common.restore")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem variant="destructive" onClick={handlePurge}>
-                    <TrashBinTrashOutlineIcon />
-                    {t("common.deletePermanently")}
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
-                    <InfoCircleOutlineIcon />
-                    {t("common.details")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
-                    <PenNewSquareOutlineIcon />
-                    {t("common.rename")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
-                    <MoveToFolderOutlineIcon />
-                    {t("common.move")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => setIsTrashOpen(true)}
-                  >
-                    <TrashBinTrashOutlineIcon />
-                    {t("common.trash")}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isRestoringFile || isPurgingFile || isDownloading ? (
+            <Button size="icon-lg" variant="ghost" disabled>
+              <Spinner className="size-5" />
+            </Button>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <AttachmentAction
+                    size="icon-lg"
+                    aria-label={t("common.moreActions")}
+                  />
+                }
+              >
+                <MoreVerticalIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {file.deletedAt ? (
+                  <>
+                    <DropdownMenuItem onClick={handleRestore}>
+                      <RefreshCircleOutlineIcon />
+                      {t("common.restore")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={handlePurge}
+                    >
+                      <TrashBinTrashOutlineIcon />
+                      {t("common.deletePermanently")}
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => setIsDetailsOpen(true)}>
+                      <InfoCircleOutlineIcon />
+                      {t("common.details")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setIsRenameOpen(true)}>
+                      <PenNewSquareOutlineIcon />
+                      {t("common.rename")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsMoveOpen(true)}>
+                      <MoveToFolderOutlineIcon />
+                      {t("common.move")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => downloadFile(file.url, file.name)}
+                    >
+                      <DownloadMinimalisticOutlineIcon />
+                      {t("common.download")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setIsTrashOpen(true)}
+                    >
+                      <TrashBinTrashOutlineIcon />
+                      {t("common.trash")}
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </AttachmentActions>
       </Attachment>
 

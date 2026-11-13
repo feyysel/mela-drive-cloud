@@ -17,7 +17,8 @@
     "logout": "Logout",
     "pleaseWait": "Please wait",
     "restore": "Restore",
-    "deletePermanently": "Delete permanently"
+    "deletePermanently": "Delete permanently",
+    "download": "Download"
   },
   "errors": {
     "unexpected": "An unexpected error occurred",
